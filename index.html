@@ -3002,6 +3002,34 @@
       transform: scale(.98)
     }
 
+    .ex-resource-block {
+      margin: 4px 0 14px
+    }
+
+    .ex-resource-embed-wrap {
+      border: 1px solid rgba(0, 59, 113, .15);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fafc;
+      margin-bottom: 10px
+    }
+
+    .ex-resource-pdf {
+      display: block;
+      width: 100%;
+      height: min(420px, 55vh);
+      border: none;
+      background: #fff
+    }
+
+    .ex-resource-img {
+      display: block;
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      margin: 0 auto
+    }
+
     /* Table */
     .srv-tbl-wrap {
       overflow-x: auto;
@@ -3432,7 +3460,7 @@
             <div class="mat-card-icon">📚</div>
             <div>
               <h3>Guías para estudiantes</h3>
-              <p>Sube guías (PDF, imágenes, Word). Al descargar la app, quedan incrustadas en la versión offline.</p>
+              <p>Sube guías (PDF, imágenes, Word). Se guardan <strong>dentro de este index</strong> (no en el navegador). Luego descarga el index con las guías incrustadas.</p>
             </div>
           </div>
 
@@ -3454,9 +3482,13 @@
             </div>
           </div>
 
-          <p style="font-size:11px;color:#8b949e;margin-top:12px">
-            Las guías se guardan en este navegador. Para que el grupo las tenga sin internet, descarga la app
-            <strong>después</strong> de subirlas.
+          <button type="button" class="srv-import-btn-main" style="margin-top:14px;width:100%;max-width:100%" onclick="downloadEmbeddedIndex()">
+            <span style="font-size:1.6rem">💾</span>
+            <span>Descargar index con PDFs incrustados</span>
+          </button>
+          <p style="font-size:11px;color:#8b949e;margin-top:10px">
+            Sube las guías y pulsa el botón. El archivo <strong>index.html</strong> descargado ya lleva los PDFs dentro;
+            súbelo al servidor o compártelo al grupo (online y offline).
           </p>
         </div>
 
@@ -3946,7 +3978,7 @@
               <div class="matl-card-icon">📚</div>
               <div>
                 <h4>Guías para estudiantes</h4>
-                <p>Sube un PDF, imagen o Word por módulo ACT. Se incrusta en la versión offline al descargar la app.
+                <p>Sube un PDF, imagen o Word por módulo ACT. Queda guardado en este mismo index (bloque embebido). Descarga el index para publicarlo o usarlo sin internet.
                 </p>
               </div>
             </div>
@@ -3968,6 +4000,12 @@
                 <div id="matl-current-wrap"></div>
               </div>
             </div>
+            <button type="button" class="btn btn-sm" style="width:100%;margin-top:14px" onclick="downloadEmbeddedIndex()">
+              💾 Descargar index con PDFs incrustados
+            </button>
+            <p style="font-size:12px;color:var(--txt2);margin-top:8px;line-height:1.45">
+              Tras subir guías, descarga el index: los estudiantes verán el PDF incrustado en cada actividad (online u offline).
+            </p>
           </div>
 
           <div class="card" id="teacher-summary"></div>
@@ -4072,8 +4110,8 @@
 
   </div><!-- /student-mode -->
 
-  <!-- Materiales PDF incrustados por el docente (se actualiza al subir/eliminar un PDF).
-       Al exportar la versión offline, este contenido queda dentro del propio .html. -->
+  <!-- Única fuente de guías PDF/imagen/Word: JSON embebido en este index (sin localStorage).
+       Se actualiza al subir/eliminar; al descargar el index, los PDFs viajan dentro del archivo. -->
   <script type="application/json" id="embedded-docs-data">{}</script>
 
   <script>
@@ -4108,9 +4146,9 @@
     const STORAGE_KEY = 'activa_users_v6'; // clave localStorage: base de datos principal { usuarios: [...] }
     const DOC_KEY = 'activa_docente_v6'; // clave localStorage: configuración del docente (PINs, nombre, grupo)
     const STATE_KEY = 'activa_state_v6'; // clave sessionStorage: estado de navegación/UI de la sesión actual
-    const DOCS_KEY = 'activa_docs_v1'; // clave localStorage: recursos (PDF/imagen/Word) subidos por actividad
-    const EMBEDDED_DOCS_ID = 'embedded-docs-data'; // id del <script type="application/json"> donde se incrustan los DOCS al exportar la app offline
-    const MAX_DOC_MB = 2; // límite duro: el recurso se guarda en base64 y se incrusta en el HTML offline
+    const EMBEDDED_DOCS_ID = 'embedded-docs-data'; // única fuente: JSON embebido en este index (PDF/imagen/Word en base64)
+    const LEGACY_DOCS_KEY = 'activa_docs_v1'; // solo migración única desde versiones antiguas; ya no se escribe
+    const MAX_DOC_MB = 2; // límite duro: el recurso se guarda en base64 dentro del index
     const MAX_DOCS_PER_EX = 2; // máximo de recursos (PDF/imagen/Word) por actividad
     const DEFAULT_PIN_DOCENTE = 'UNADDOCENTE2026'; // PIN por defecto para el rol docente (se puede cambiar desde configuración)
     const DEFAULT_PIN_ADMIN = 'UNADADMIN2026'; // PIN por defecto para el rol administrador
@@ -4438,10 +4476,8 @@
 
     /* ============================================================
        GUÍAS PARA ESTUDIANTES (materiales por actividad)
-       Se guardan en localStorage y además se "incrustan" en un
-       <script type="application/json"> oculto del propio HTML, para
-       que al exportar la app offline (downloadApp) el recurso viaje
-       dentro del archivo y no dependa del localStorage del navegador.
+       Se guardan solo en <script type="application/json" id="embedded-docs-data">
+       del propio index. El rol estudiante y la descarga offline leen ahí.
     ============================================================ */
     /** Escapa caracteres especiales HTML (&, <, >, ", ') para insertar texto de forma segura en templates de innerHTML. @param {*} s @returns {string} */
     function escHtml(s) {
@@ -4456,6 +4492,42 @@
       if (/\.(docx?|rtf)$/.test(n)) return { icon: '📘', label: 'Documento Word' };
       if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return { icon: '🖼️', label: 'Imagen' };
       return { icon: '📄', label: 'Archivo' };
+    }
+
+    /** @param {{name?:string,dataUrl?:string}} d */
+    function isPdfResource(d) {
+      if (/\.pdf$/i.test(d.name || '')) return true;
+      return /^data:application\/pdf/i.test(String(d.dataUrl || ''));
+    }
+
+    /** @param {{name?:string,dataUrl?:string}} d */
+    function isImageResource(d) {
+      if (/\.(png|jpe?g|gif|webp|svg)$/i.test(d.name || '')) return true;
+      return /^data:image\//i.test(String(d.dataUrl || ''));
+    }
+
+    /**
+     * Bloque de recurso docente en la actividad del estudiante: incrusta PDF/imagen en línea
+     * (data URL) y mantiene botón de descarga. Funciona igual online y en el .html offline.
+     */
+    function studentResourceHtml(d, exId) {
+      const t = docType(d.name);
+      const safeName = escHtml(d.name || 'recurso');
+      const logName = escHtml(d.name || 'recurso').replace(/'/g, "\\'");
+      let embed = '';
+      if (isPdfResource(d)) {
+        embed = `<iframe class="ex-resource-pdf" src="${d.dataUrl}" title="${safeName}"></iframe>`;
+      } else if (isImageResource(d)) {
+        embed = `<img class="ex-resource-img" src="${d.dataUrl}" alt="${safeName}">`;
+      }
+      const actionLabel = embed ? `Descargar ${t.label}` : `${t.label} del docente — descargar`;
+      return `
+    <div class="ex-resource-block">
+      ${embed ? `<div class="ex-resource-embed-wrap">${embed}</div>` : ''}
+      <a href="${d.dataUrl}" download="${safeName}" class="ex-resource-btn" onclick="logResourceDownload('${exId}','${logName}')">
+        <span>${t.icon}</span><span>${actionLabel}</span>
+      </a>
+    </div>`;
     }
 
     /* ============================================================
@@ -4689,67 +4761,58 @@
       downloadBlob(buildXlsxBlob(rows, sheetName), filename);
     }
 
-    /**
-     * Lee del localStorage los recursos (PDF/imagen/Word) subidos por actividad y
-     * normaliza el formato: si un dato antiguo quedó guardado como objeto único
-     * (en vez de arreglo), lo envuelve en un arreglo de un elemento.
-     * @returns {Object<string, Array<{name:string,dataUrl:string,size:number,uploadedAt:string}>>}
-     *   mapa exId → lista de recursos (hasta MAX_DOCS_PER_EX por actividad)
-     */
-    // Devuelve { [exId]: [ {name,dataUrl,size,uploadedAt}, ... ] } — hasta MAX_DOCS_PER_EX por actividad.
-    // Normaliza datos guardados en el formato anterior (un solo objeto por actividad, sin arreglo).
-    function getDocs() {
-      let raw;
-      try { raw = JSON.parse(localStorage.getItem(DOCS_KEY) || '{}'); }
-      catch { raw = {}; }
+    /** Normaliza el mapa exId → recursos (formato antiguo: un objeto en vez de arreglo). */
+    function normalizeDocsMap(raw) {
       const norm = {};
-      Object.keys(raw).forEach(exId => {
+      Object.keys(raw || {}).forEach(exId => {
         norm[exId] = Array.isArray(raw[exId]) ? raw[exId] : [raw[exId]];
       });
       return norm;
     }
 
-    /** Actualiza el <script type="application/json" id="embedded-docs-data"> con el estado actual de `docs`, para que viaje incrustado al exportar la app offline. @param {object} docs Efecto: modifica el DOM (textContent de ese script tag). */
+    /** Lee el JSON crudo del bloque embebido en este index. */
+    function readEmbeddedDocsRaw() {
+      const tag = document.getElementById(EMBEDDED_DOCS_ID);
+      if (!tag) return {};
+      try { return JSON.parse(tag.textContent || '{}'); }
+      catch { return {}; }
+    }
+
+    /**
+     * Recursos del docente: solo desde #embedded-docs-data en este index (sin localStorage).
+     * @returns {Object<string, Array<{name:string,dataUrl:string,size:number,uploadedAt:string}>>}
+     */
+    function getDocs() {
+      return normalizeDocsMap(readEmbeddedDocsRaw());
+    }
+
+    /** Escribe el mapa de guías en el <script id="embedded-docs-data"> del index. */
     function syncEmbeddedDocs(docs) {
       const tag = document.getElementById(EMBEDDED_DOCS_ID);
       if (tag) tag.textContent = JSON.stringify(docs);
     }
 
-    /**
-     * Guarda el mapa de recursos por actividad en localStorage y lo sincroniza en
-     * el <script> embebido (syncEmbeddedDocs). Si falla por cuota excedida, avisa
-     * con un alert y no lanza excepción.
-     * @param {object} docs
-     * @returns {boolean} true si se guardó correctamente, false si falló
-     */
+    /** Persiste guías únicamente en el index embebido. @returns {boolean} */
     function setDocs(docs) {
       try {
-        localStorage.setItem(DOCS_KEY, JSON.stringify(docs));
         syncEmbeddedDocs(docs);
         return true;
       } catch (err) {
-        console.error('No se pudo guardar la guía:', err);
-        alert('⚠️ El almacenamiento de este dispositivo está lleno.\n\nEl recurso no se guardó. Prueba con un archivo más liviano o elimina materiales/fotos antiguas.');
+        console.error('No se pudo incrustar la guía en el index:', err);
+        alert('⚠️ No se pudo guardar la guía en el index.\n\nPrueba con un archivo más liviano (máx. ' + MAX_DOC_MB + ' MB).');
         return false;
       }
     }
 
-    /**
-     * Si este HTML es la versión offline exportada, siembra localStorage con las
-     * guías/recursos que quedaron incrustados en el propio archivo (solo si
-     * localStorage está vacío, para no sobrescribir datos ya existentes).
-     * Efecto: puede escribir en localStorage vía setDocs().
-     */
-    // Si este HTML es la versión offline exportada, siembra localStorage
-    // con las guías que quedaron incrustadas en el propio archivo.
-    function seedDocsFromEmbedded() {
-      const tag = document.getElementById(EMBEDDED_DOCS_ID);
-      if (!tag) return;
-      let embedded = {};
-      try { embedded = JSON.parse(tag.textContent || '{}'); } catch { embedded = {}; }
-      if (!Object.keys(embedded).length) return;
-      const current = getDocs();
-      if (!Object.keys(current).length) setDocs(embedded);
+    /** Migra guías antiguas de localStorage al index embebido (una sola vez) y borra la clave legacy. */
+    function migrateDocsFromLocalStorage() {
+      try {
+        const legacy = localStorage.getItem(LEGACY_DOCS_KEY);
+        if (!legacy) return;
+        const embedded = readEmbeddedDocsRaw();
+        if (!Object.keys(embedded).length) setDocs(normalizeDocsMap(JSON.parse(legacy)));
+        localStorage.removeItem(LEGACY_DOCS_KEY);
+      } catch (_) { /* ignorar */ }
     }
 
     const DOC_ACCEPT = '.pdf,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*';
@@ -4773,11 +4836,11 @@
     /**
      * Sube un documento/recurso (PDF, imagen o Word) asociado a una actividad específica.
      * Valida formato, tamaño (máx. MAX_DOC_MB) y cantidad (máx. MAX_DOCS_PER_EX) antes de
-     * codificar el archivo en base64 y guardarlo en localStorage. Registra el evento en
-     * el log de auditoría y refresca el panel de materiales.
+     * codificar el archivo en base64 e incrustarlo en #embedded-docs-data del index.
+     * Registra el evento en el log de auditoría y refresca el panel de materiales.
      * @param {string} exId - id de la actividad (ej. 'defusion', 'valores')
      * @param {HTMLInputElement} fileInput - input[type=file] que disparó la carga
-     * Efecto secundario: localStorage, auditoría, alert en validaciones fallidas, DOM.
+     * Efecto secundario: DOM (script embebido), auditoría, alert en validaciones fallidas.
      */
     function uploadDocForExercise(exId, fileInput) {
       const file = fileInput.files && fileInput.files[0];
@@ -4811,7 +4874,7 @@
         list.push({ name: file.name, dataUrl: reader.result, size: file.size, uploadedAt: new Date().toISOString() });
         docs2[exId] = list;
         if (setDocs(docs2)) {
-          toast('📎 Guía guardada');
+          toast('📎 Guía incrustada en el index');
           logAuditEvent('carga', exId, file.name, (getConfig().nombreDocente || 'Docente'), (state.mode || 'profesor'));
           renderDocsPanel();
         }
@@ -5732,13 +5795,7 @@
 
       // ── Recursos aportados por el docente (hasta 2 por actividad; solo si el docente cargó alguno) ──
       const exDocs = getDocs()[ex.id] || [];
-      exDocs.forEach(d => {
-        const t = docType(d.name);
-        html += `
-    <a href="${d.dataUrl}" download="${escHtml(d.name || 'recurso')}" class="ex-resource-btn" onclick="logResourceDownload('${ex.id}','${escHtml(d.name || 'recurso').replace(/'/g, "\\'")}')">
-      <span>${t.icon}</span><span>${t.label} recurso aportado por el docente</span>
-    </a>`;
-      });
+      exDocs.forEach(d => { html += studentResourceHtml(d, ex.id); });
 
       // ── Cierre del ejercicio ─────────────────────────────────────────────────
       html += `
@@ -7200,8 +7257,7 @@ EMOCIONES REGISTRADAS:
     function init() {
       try {
         migrateIfNeeded();
-        seedDocsFromEmbedded(); // si esta es la versión offline exportada, recupera los PDFs incrustados
-        syncEmbeddedDocs(getDocs()); // asegura que el HTML siempre lleve los PDFs actuales (para "Descargar App")
+        migrateDocsFromLocalStorage();
         // Cerrar cualquier modal que pudiera haber quedado abierto
         const overlay = document.getElementById('modal-overlay');
         if (overlay) {
@@ -7325,7 +7381,27 @@ EMOCIONES REGISTRADAS:
     }
 
     /** Descarga el HTML actual completo de la página (document.documentElement.outerHTML) como archivo .html independiente, para uso 100% offline. Efecto: dispara una descarga, muestra un toast. */
-    function downloadApp() { const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ACTivaArte_UNAD_offline.html'; a.click(); URL.revokeObjectURL(a.href); toast('💾 App descargada') }
+    /** Exporta este index completo; el JSON embebido ya incluye los PDFs subidos. */
+    function exportIndexHtmlFile(filename, toastMsg) {
+      syncEmbeddedDocs(getDocs());
+      const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast(toastMsg);
+    }
+
+    /** Docente: descarga index.html con guías/PDFs ya incrustados para publicar o compartir. */
+    function downloadEmbeddedIndex() {
+      exportIndexHtmlFile('index.html', '💾 Index descargado con PDFs incrustados');
+    }
+
+    /** Estudiante: copia offline del index (mismas guías embebidas). */
+    function downloadApp() {
+      exportIndexHtmlFile('ACTivaArte_UNAD_offline.html', '💾 App descargada con guías incluidas');
+    }
 
     /**
      * Exporta el progreso del usuario activo como archivo .json, pseudonimizando
