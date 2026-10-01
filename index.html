@@ -3810,15 +3810,12 @@
             <span>📤</span> Exportar mis datos (.json) para el docente
           </button>
 
-          <!-- DESCARGAR APP — siempre visible -->
-          <button class="sbtn sbtn-sm" onclick="downloadApp()">
-            <span>💾</span> Descargar app para usar sin internet
-          </button>
+          <!-- El estudiante no descarga la app: usa el archivo offline que le entrega el docente -->
           <p
             style="font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin-top:6px;margin-bottom:2px;line-height:1.5;padding:0 4px">
-            📝 Descárgala y ponle tu nombre y cédula así:<br>
+            📝 El archivo se descarga ya nombrado con tu nombre y cédula, así:<br>
             <strong
-              style="color:rgba(255,255,255,.82);font-size:11.5px;letter-spacing:.2px">Maria_Perez_1032162406</strong>
+              style="color:rgba(255,255,255,.82);font-size:11.5px;letter-spacing:.2px">ACTivaArte_Maria_Perez_1032162406_2026-10-01.json</strong>
           </p>
 
           <div class="sync-url-row">
@@ -7514,11 +7511,6 @@ EMOCIONES REGISTRADAS:
     /** Docente: descarga index.html con guías/PDFs ya incrustados para publicar o compartir. */
     function downloadEmbeddedIndex() {
       exportIndexHtmlFile('index.html', '💾 Index descargado con PDFs incrustados');
-    }
-
-    /** Estudiante: copia offline del index (mismas guías embebidas). */
-    function downloadApp() {
-      exportIndexHtmlFile('ACTivaArte_UNAD_offline.html', '💾 App descargada con guías incluidas');
     }
 
     /** Convierte un texto en un fragmento seguro para nombre de archivo (sin caracteres inválidos, espacios → guion bajo). */
