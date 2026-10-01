@@ -4023,41 +4023,7 @@
             <button type="button" class="btn btn-primary" id="group-export-btn" onclick="exportGroupJson()">📦 Exportar JSON del grupo</button>
           </div>
 
-          <!-- GUÍAS PARA ESTUDIANTES (materiales por módulo ACT) -->
-          <div class="card">
-            <div class="matl-card">
-              <div class="matl-card-icon">📚</div>
-              <div>
-                <h4>Guías para estudiantes</h4>
-                <p>Sube un PDF, imagen o Word por módulo ACT. Queda guardado en este mismo index (bloque embebido). Descarga el index para publicarlo o usarlo sin internet.
-                </p>
-              </div>
-            </div>
-            <div class="matl-grid">
-              <div>
-                <div class="matl-modules-label">Selecciona el módulo</div>
-                <div class="matl-module-list" id="matl-module-list"></div>
-              </div>
-              <div class="matl-selected-panel">
-                <div class="matl-selected-title" id="matl-selected-title">Módulo seleccionado</div>
-                <label class="matl-drop" id="matl-drop">
-                  <span class="matl-drop-icon">📎</span>
-                  <span class="matl-drop-title">Toca para subir un recurso al módulo seleccionado</span>
-                  <span class="matl-drop-hint">PDF · Imágenes · Word · Máx. 2MB · hasta 2 por módulo</span>
-                  <input type="file" id="matl-file-input"
-                    accept=".pdf,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
-                    style="display:none">
-                </label>
-                <div id="matl-current-wrap"></div>
-              </div>
-            </div>
-            <button type="button" class="btn btn-sm" style="width:100%;margin-top:14px" onclick="downloadEmbeddedIndex()">
-              💾 Descargar index con PDFs incrustados
-            </button>
-            <p style="font-size:12px;color:var(--txt2);margin-top:8px;line-height:1.45">
-              Tras subir guías, descarga el index: los estudiantes verán el PDF incrustado en cada actividad (online u offline).
-            </p>
-          </div>
+          <!-- Las guías PDF ya no las sube el docente: el administrador las carga en la Bóveda (por solicitud del formulario) y el docente solo marca cuáles ve el estudiante en cada actividad. -->
 
           <div class="card" id="teacher-summary"></div>
           <div class="card">
@@ -7952,8 +7918,9 @@ async function uploadVaultPdf(file){
   const hash=await sha256(file), all=await getVaultFiles();
   if(hash&&all.some(x=>x.hash===hash)) throw new Error('Este PDF ya está en la biblioteca.');
   const now=new Date().toISOString();
-  await putRec({id:'pdf-'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2)),exerciseId:'',name:file.name,type:'application/pdf',size:file.size,blob:file,hash,uploadedAt:now,updatedAt:now,version:1,origin:'local'});
-  audit('pdf_uploaded','',file.name,'Botón "Agregar PDF a la biblioteca" ('+mb(file.size)+')'); scheduleSave();
+  const newId='pdf-'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));
+  await putRec({id:newId,exerciseId:'',name:file.name,type:'application/pdf',size:file.size,blob:file,hash,uploadedAt:now,updatedAt:now,version:1,origin:'local'});
+  audit('pdf_uploaded','',file.name,'Botón "Agregar PDF" ('+mb(file.size)+')'); scheduleSave(); return newId;
 }
 async function deleteVaultPdf(id){
   if(!canManage()) throw new Error('Solo el administrador puede eliminar PDFs.');
@@ -8076,12 +8043,13 @@ async function renderPdfVault(){ const box=document.getElementById('vault-box');
   <h3 style="margin:14px 0 4px">🎯 PDFs que verá el estudiante en cada actividad</h3>`+(canDistribute()?'<p style="font-size:12px;color:var(--txt2);margin:0 0 6px">Marca hasta 2 PDFs por actividad. El HTML que descargues solo incluirá los PDFs marcados.</p>':'')+
   `<div class="v-grid">`+EXERCISES.map(ex=>{const ids=assign[ex.id]||[];
    return `<div class="v-card"><b>${ex.icon} ${escHtml(ex.title)}</b><div style="font-size:12px;color:var(--txt2)">${ids.length} / 2 PDFs asignados</div>`+
-   (st.files.map(f=>`<label class="v-f" style="display:block;cursor:${canDistribute()?'pointer':'default'}"><input type="checkbox" ${ids.includes(f.id)?'checked':''} ${canDistribute()?'':'disabled'} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)}</label>`).join('')||'<div class="v-f" style="color:var(--txt2)">Sin PDFs en la biblioteca</div>')+`</div>`;}).join('')+'</div>'; }
+   (st.files.map(f=>`<label class="v-f" style="display:block;cursor:${canDistribute()?'pointer':'default'}"><input type="checkbox" ${ids.includes(f.id)?'checked':''} ${canDistribute()?'':'disabled'} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)}</label>`).join('')||'<div class="v-f" style="color:var(--txt2)">Sin PDFs en la biblioteca</div>')+
+   (m?`<button class="v-add" ${(ids.length>=MAX_PDFS_PER_ACTIVITY||st.count>=MAX_TOTAL_PDFS)?'disabled title="Módulo o biblioteca llenos"':''} onclick="vaultUI('add','${ex.id}')">+ Agregar PDF a este módulo</button>`:'')+`</div>`;}).join('')+'</div>'; }
 window.vaultUI=async(a,x,y)=>{ try{
   if(a==='open') return openVaultPdf(x); if(a==='dl') return downloadVaultPdf(x);
   if(a==='assign'){ try{ await toggleAssign(x,y); }catch(e){ alert('⚠️ '+friendly(e)); } if(document.getElementById('vault-ov').style.display==='block') renderPdfVault(); return; }
   if(a==='del'){ const r=await getVaultPdf(x); if(r&&confirm('¿Seguro que deseas eliminar “'+r.name+'” de la bóveda?')){await deleteVaultPdf(x);toast('🗑 PDF eliminado');} }
-  if(a==='add'){ const i=document.createElement('input'); i.type='file'; i.accept='application/pdf,.pdf'; i.onchange=async()=>{ try{ await uploadVaultPdf(i.files[0]); toast('✅ PDF guardado'); }catch(e){ alert('⚠️ '+friendly(e)); } renderPdfVault(); }; i.click(); return; }
+  if(a==='add'){ const i=document.createElement('input'); i.type='file'; i.accept='application/pdf,.pdf'; i.onchange=async()=>{ try{ const nid=await uploadVaultPdf(i.files[0]); if(x){ try{ await toggleAssign(x,nid); }catch(e2){ alert('⚠️ El PDF quedó en la biblioteca, pero no se asignó al módulo: '+friendly(e2)); } } toast('✅ PDF guardado'+(x?' y asignado al módulo':'')); }catch(e){ alert('⚠️ '+friendly(e)); } renderPdfVault(); }; i.click(); return; }
   renderPdfVault(); }catch(e){ alert('⚠️ '+friendly(e)); } };
 Object.assign(window,{uploadVaultPdf,deleteVaultPdf,openVaultPdf,downloadVaultPdf,getVaultStats,renderPdfVault,exportPdfVault,restoreEmbeddedPdfVault,validatePdfFile,openPdfVaultDB});
 /* ---- Panel de PDFs dentro de cada actividad ---- */
