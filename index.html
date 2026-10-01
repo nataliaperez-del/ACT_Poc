@@ -756,6 +756,26 @@
       .emotion-grid {
         grid-template-columns: 1fr 1fr
       }
+
+      /* Encabezado en pantallas estrechas: el contador de puntos no se parte en dos líneas */
+      .stu-pts {
+        white-space: nowrap;
+        flex-shrink: 0
+      }
+
+      .stu-role-btn {
+        white-space: nowrap;
+        padding-left: 8px;
+        padding-right: 8px
+      }
+
+      #audit-stats {
+        grid-template-columns: repeat(3, 1fr) !important
+      }
+
+      #audit-stats .stat-chip {
+        padding: 8px 4px
+      }
     }
 
     .emotion-pill {
@@ -6905,8 +6925,8 @@ EMOCIONES REGISTRADAS:
         <h3 style="font-size:15px;margin:0;color:var(--azul);">📊 Resumen ${panelLabel} — ${cfg.grupoNombre}</h3>
         <small style="font-size:12px;color:var(--txt2);">Datos de ${visibleLabel}. Actualizado: ${new Date().toLocaleTimeString()}</small>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        ${isAdmin ? `<select id="teacher-filter-mode" style="min-width:170px;padding:8px 10px;border-radius:var(--rs);border:1px solid #cfd8e5;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:100%;">
+        ${isAdmin ? `<select id="teacher-filter-mode" style="min-width:0;flex:1 1 170px;max-width:100%;padding:8px 10px;border-radius:var(--rs);border:1px solid #cfd8e5;">
           <option value="todos" ${modeFilter === 'todos' ? 'selected' : ''}>Todos (docentes + estudiantes)</option>
           <option value="estudiantes" ${modeFilter === 'estudiantes' ? 'selected' : ''}>Estudiantes</option>
           <option value="docentes" ${modeFilter === 'docentes' ? 'selected' : ''}>Docentes</option>
@@ -7952,7 +7972,9 @@ const css=document.createElement('style'); css.id='vault-css'; css.textContent=`
 #vault-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9001;display:none;overflow:auto;padding:12px}
 #vault-box{background:var(--fondo);max-width:900px;margin:0 auto;border-radius:var(--r);padding:18px;color:var(--txt)}
 .v-bar{height:12px;background:var(--borde);border-radius:8px;overflow:hidden}.v-bar i{display:block;height:100%;background:var(--verde)}
-.v-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+.v-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px;margin-top:14px}
+.v-card,.v-f{overflow-wrap:anywhere}
+@media(max-width:480px){#vault-fab{right:10px;bottom:10px;padding:9px 14px;font-size:13px}#vault-box{padding:12px}#vault-ov{padding:8px}}
 .v-card{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--r);padding:14px;box-shadow:var(--sombra)}
 .v-f{border-top:1px solid var(--borde);padding:8px 0;font-size:13px}.v-f button,.v-add{background:var(--azul-m);color:#fff;border:0;border-radius:var(--rs);padding:6px 10px;margin:4px 4px 0 0;cursor:pointer;font-size:12px}
 .v-f .v-del{background:#c0392b}.v-add{background:var(--verde);width:100%;padding:8px}`;
