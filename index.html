@@ -7953,7 +7953,7 @@ async function saveLinked(manual){
 function scheduleSave(){ clearTimeout(_saveT); _saveT=setTimeout(async()=>{
   if(await linkedHandle()) return saveLinked(false);
   await setMeta('dirty',true); toast(FS_OK?'ℹ️ PDF guardado. Vincula el archivo en la Bóveda para incrustarlo en el HTML.':'ℹ️ PDF guardado. Descarga el HTML actualizado desde la Bóveda.'); },1500); }
-Object.assign(window,{linkHtmlFile,saveLinked,toggleAssign,getAssign,buildSnapshot,restoreEmbeddedPdfVault});
+Object.assign(window,{linkHtmlFile,saveLinked,toggleAssign,getAssign,buildSnapshot,restoreEmbeddedPdfVault,renderTeacherVault});
 /* ---- Interfaz ---- */
 const css=document.createElement('style'); css.id='vault-css'; css.textContent=`
 #vault-fab{position:fixed;right:16px;bottom:16px;z-index:9000;display:none;background:var(--azul);color:#fff;border:0;border-radius:30px;padding:12px 18px;font-weight:700;box-shadow:var(--sombra-lg);cursor:pointer}
@@ -8010,7 +8010,8 @@ async function renderTeacherVault(){ const card=document.getElementById('vault-t
   let st; try{st=await getVaultStats();}catch(e){ body.innerHTML='<p>⚠️ '+escHtml(friendly(e))+'</p>'; return; }
   const assign=await getAssign(), nAsig=new Set([].concat(...Object.values(assign))).size;
   body.innerHTML=`<p style="font-size:12px;color:var(--txt2);margin:0 0 10px">Marca hasta 2 PDFs por actividad. El HTML que descargues incluirá <b>solo los PDFs marcados</b> (${nAsig} de ${st.count} en la biblioteca) y la trazabilidad registrada hasta ahora.</p>`+
-   (st.count?'':'<div class="v-f" style="color:var(--txt2)">No hay PDFs en la biblioteca. El administrador debe cargarlos y entregarte el HTML.</div>')+
+   (st.count?'':'<div class="v-f" style="color:#c0392b"><b>Este HTML no trae PDFs incrustados.</b> Los PDFs que el administrador carga quedan en su propio navegador; para que lleguen a ti debe pulsar <i>Descargar HTML</i> en su Bóveda (o dejar el archivo vinculado) y entregarte/publicar ese archivo. Abre ese HTML actualizado y vuelve a entrar.</div>')+
+   `<button class="v-add" style="width:auto;margin:0 0 10px" onclick="renderTeacherVault()">🔄 Actualizar lista</button>`+
    `<div class="v-grid">`+EXERCISES.map(ex=>{const ids=assign[ex.id]||[];
      return `<div class="v-card"><b>${ex.icon} ${escHtml(ex.title)}</b><div style="font-size:12px;color:var(--txt2)">${ids.length} / 2 PDFs asignados</div>`+
       st.files.map(f=>`<label class="v-f" style="display:block;cursor:pointer"><input type="checkbox" ${ids.includes(f.id)?'checked':''} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)} <span style="color:var(--txt2)">(${mb(f.size)})</span></label>`).join('')+`</div>`;}).join('')+`</div>
@@ -8020,7 +8021,7 @@ const _se=window.startExercise;
 window.startExercise=function(exId){ const r=_se.apply(this,arguments); audit('ejercicio_iniciado',exId,'','Abrió la actividad desde el tablero'); const det=document.getElementById('exercise-detail');
   if(det&&det.children.length){ const box=document.createElement('div'); box.id='vault-ex-panel'; const cl=det.querySelector('.ex-close-card'); (cl&&cl.parentNode===det)?cl.before(box):det.append(box); refreshExPanel(); } return r; };
 const _vu=window.vaultUI; window.vaultUI=async function(){ await _vu.apply(this,arguments); setTimeout(()=>{ refreshExPanel(); renderTeacherVault(); },300); };
-restoreEmbeddedPdfVault().then(migrateAssign).catch(e=>{console.error(e);audit('pdf_sync_failed','','restauración');});
+restoreEmbeddedPdfVault().then(migrateAssign).then(()=>{ renderTeacherVault(); refreshExPanel(); }).catch(e=>{console.error(e);audit('pdf_sync_failed','','restauración');});
 })();
 </script>
 </body>
