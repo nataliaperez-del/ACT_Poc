@@ -4630,6 +4630,7 @@
       ejercicio_completado: '✅ Completó una actividad',
       json_exportado: '📤 Exportó su JSON de progreso',
       json_importado: '📥 Importó JSON de estudiantes',
+      compromiso_docente: '🤝 Aceptó el compromiso de distribución y entrega del JSON',
       json_grupo_exportado: '📦 Generó el JSON del grupo para el administrador',
       trazabilidad_importada: '📥 Recibió trazabilidad de otros perfiles'
     };
@@ -7998,12 +7999,18 @@ async function buildSnapshot(){
 }
 function downloadSnapshot(html,fn){ const u=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})), a=document.createElement('a'); a.href=u; a.download=fn; a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); }
 /* exportación: mismo flujo de siempre, ahora con instantánea limpia */
+let _compromiso=false; // el docente debe aceptar el compromiso antes de CADA descarga
+window.vaultCommit=ck=>{ _compromiso=!!ck; const b=document.getElementById('vault-dl-btn'); if(b) b.disabled=!_compromiso; };
+const COMPROMISO_TXT='Me comprometo a hacer llegar la versión offline a los usuarios finales (los estudiantes), a regresar el archivo JSON consolidado y a registrarlo en el formulario para el administrador.';
 window.exportIndexHtmlFile=async function(fn,msg){
+  if(rol()==='profesor'&&!_compromiso){ toast('⚠️ Marca el compromiso de distribución para habilitar la descarga'); return; }
   try{ syncEmbeddedDocs(getDocs()); }catch(e){}
   const st=await getVaultStats().catch(()=>({count:0,used:0}));
   if(st.used>12*1048576&&!confirm('La aplicación contiene varios archivos PDF. La copia HTML puede ser considerablemente más pesada que los originales y la exportación puede tardar unos segundos. ¿Continuar?')) return;
-  try{ audit('pdf_vault_exported','',fn,'Botón "Descargar HTML para distribuir" ('+st.count+' PDFs en la biblioteca)'); // se registra antes para que viaje dentro del archivo
-    downloadSnapshot(await buildSnapshot(),fn); toast(msg); }catch(e){ toast('⚠️ '+friendly(e)); } };
+  try{ if(rol()==='profesor') audit('compromiso_docente','',fn,COMPROMISO_TXT);
+    audit('pdf_vault_exported','',fn,'Botón "Descargar HTML para distribuir" ('+st.count+' PDFs en la biblioteca)'); // se registra antes para que viaje dentro del archivo
+    downloadSnapshot(await buildSnapshot(),fn); toast(msg);
+    if(rol()==='profesor'){ _compromiso=false; renderTeacherVault(); } }catch(e){ toast('⚠️ '+friendly(e)); } };
 /* ---- Guardado automático sobre el mismo archivo HTML (Chrome/Edge, File System Access API) ---- */
 const FS_OK=typeof window.showOpenFilePicker==='function';
 let _saveT, _saving=false, _pending=false;
@@ -8097,7 +8104,9 @@ async function renderTeacherVault(){ const card=document.getElementById('vault-t
    `<div class="v-grid">`+EXERCISES.map(ex=>{const ids=assign[ex.id]||[];
      return `<div class="v-card"><b>${ex.icon} ${escHtml(ex.title)}</b><div style="font-size:12px;color:var(--txt2)">${ids.length} / 2 PDFs asignados</div>`+
       st.files.map(f=>`<label class="v-f" style="display:block;cursor:pointer"><input type="checkbox" ${ids.includes(f.id)?'checked':''} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)} <span style="color:var(--txt2)">(${mb(f.size)})</span></label>`).join('')+`</div>`;}).join('')+`</div>
-   <button class="v-add" style="width:auto;margin-top:14px" onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>`; }
+   <div class="v-f" style="margin-top:14px;border:1px solid var(--amarillo);border-radius:var(--rs);padding:12px;background:rgba(242,169,0,.08)"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;line-height:1.5;font-size:13px"><input type="checkbox" id="vault-commit-ck" style="width:18px;height:18px;flex-shrink:0;margin-top:2px" ${_compromiso?'checked':''} onchange="vaultCommit(this.checked)"><span><b>Compromiso del docente.</b> ${COMPROMISO_TXT}</span></label></div>
+   <button class="v-add" id="vault-dl-btn" style="width:auto;margin-top:12px" ${_compromiso?'':'disabled'} onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>
+   <div style="font-size:11px;color:var(--txt2);margin-top:6px">La descarga se habilita al aceptar el compromiso. Debes aceptarlo cada vez que descargues.</div>`; }
 const _bt=window.buildTeacher; if(typeof _bt==='function') window.buildTeacher=function(){ const r=_bt.apply(this,arguments); renderTeacherVault(); return r; };
 const _se=window.startExercise;
 window.startExercise=function(exId){ const r=_se.apply(this,arguments); audit('ejercicio_iniciado',exId,'','Abrió la actividad desde el tablero'); const det=document.getElementById('exercise-detail');
