@@ -4096,12 +4096,12 @@
               <select class="form-input" id="filter-exercise"
                 style="flex:1;min-width:120px;padding:8px 12px;font-size:13px" aria-label="Filtrar por ejercicio">
                 <option value="">Todos los ejercicios</option>
-                <option value="defusion">Defusión</option>
+                <option value="defusion">Defusión cognitiva</option>
                 <option value="aceptacion">Aceptación</option>
-                <option value="yo">Mi Yo Firme</option>
-                <option value="valores">Mis Valores</option>
-                <option value="mandala">Mandala</option>
-                <option value="presente">Momento Presente</option>
+                <option value="yo">Yo como contexto</option>
+                <option value="valores">Clarificación de valores</option>
+                <option value="mandala">Acción comprometida</option>
+                <option value="presente">Contacto con el momento presente</option>
                 <option value="modulo">Módulo Reflexión</option>
               </select>
             </div>
@@ -4234,15 +4234,15 @@
       // Positivas: score 10
       { id: 'alegre', icon: '😄', label: 'Alegre', valencia: 'positiva', score: 10, rec: '¡Aprovecha tu energía! Explora la Galería o trabaja tus Valores.' },
       { id: 'entusiasmado', icon: '🤩', label: 'Entusiasmado', valencia: 'positiva', score: 10, rec: '¡Genial! Es un buen momento para la Acción Comprometida o el Mandala.' },
-      { id: 'calmo', icon: '😌', label: 'Calmo', valencia: 'positiva', score: 10, rec: 'Tu calma es un regalo. Profundiza con Momento Presente o Mis Valores.' },
+      { id: 'calmo', icon: '😌', label: 'Calmo', valencia: 'positiva', score: 10, rec: 'Tu calma es un regalo. Profundiza con Contacto con el momento presente o Clarificación de valores.' },
       // Neutrales: score 5
-      { id: 'indiferente', icon: '😑', label: 'Indiferente', valencia: 'neutral', score: 5, rec: 'Activa tu energía con Hojas en el Río o Momento Presente.' },
-      { id: 'cansado', icon: '😴', label: 'Cansado', valencia: 'neutral', score: 5, rec: 'Date un respiro. Empieza con la Respiración y Aceptación.' },
-      { id: 'sorprendido', icon: '😮', label: 'Sorprendido', valencia: 'neutral', score: 5, rec: 'Explora qué hay detrás de esa sorpresa con Mi Yo Firme.' },
+      { id: 'indiferente', icon: '😑', label: 'Indiferente', valencia: 'neutral', score: 5, rec: 'Activa tu energía con Defusión cognitiva o Contacto con el momento presente.' },
+      { id: 'cansado', icon: '😴', label: 'Cansado', valencia: 'neutral', score: 5, rec: 'Date un respiro. Empieza con la Aceptación.' },
+      { id: 'sorprendido', icon: '😮', label: 'Sorprendido', valencia: 'neutral', score: 5, rec: 'Explora qué hay detrás de esa sorpresa con Yo como contexto.' },
       // Negativas: score 2
-      { id: 'triste', icon: '😢', label: 'Triste', valencia: 'negativa', score: 2, rec: 'Un abrazo virtual. Prueba la Respiración y Aceptación o Defusión Cognitiva.' },
-      { id: 'ansioso', icon: '😰', label: 'Ansioso', valencia: 'negativa', score: 2, rec: 'Respira. El ejercicio de Respiración y Aceptación está aquí para ti.' },
-      { id: 'enojado', icon: '😤', label: 'Enojado', valencia: 'negativa', score: 2, rec: 'Es válido sentirte así. Prueba Defusión Cognitiva o Mi Yo Firme.' }
+      { id: 'triste', icon: '😢', label: 'Triste', valencia: 'negativa', score: 2, rec: 'Un abrazo virtual. Prueba la Aceptación o Defusión cognitiva.' },
+      { id: 'ansioso', icon: '😰', label: 'Ansioso', valencia: 'negativa', score: 2, rec: 'Respira. El ejercicio de Aceptación está aquí para ti.' },
+      { id: 'enojado', icon: '😤', label: 'Enojado', valencia: 'negativa', score: 2, rec: 'Es válido sentirte así. Prueba Defusión cognitiva o Yo como contexto.' }
     ];
 
     /*
@@ -4256,12 +4256,12 @@
       aceptacion_presente: {
         emociones: ['ansioso', 'cansado'],
         ejercicio: 'aceptacion',
-        texto: '💛 Notas tensión o fatiga. Te recomendamos Respiración y Aceptación para encontrar tu centro.'
+        texto: '💛 Notas tensión o fatiga. Te recomendamos Aceptación para encontrar tu centro.'
       },
       defusion_yo: {
         emociones: ['triste', 'enojado'],
         ejercicio: 'defusion',
-        texto: '🍃 Una emoción fuerte te visita. Hojas en el Río puede ayudarte a observarla sin dejarte atrapar.'
+        texto: '🍃 Una emoción fuerte te visita. Defusión cognitiva puede ayudarte a observarla sin dejarte atrapar.'
       },
       valores_accion: {
         emociones: ['alegre', 'entusiasmado'],
@@ -4270,7 +4270,7 @@
       },
       default: {
         ejercicio: 'yo',
-        texto: '🔍 Sientes una mezcla de emociones. Mi Yo Firme puede darte claridad desde tu centro.'
+        texto: '🔍 Sientes una mezcla de emociones. Yo como contexto puede darte claridad desde tu centro.'
       }
     };
 
@@ -4325,7 +4325,7 @@
      * disponibles en la app. Cada objeto describe una actividad completa:
      *   id             - identificador interno usado en toda la app (rutas, storage, etc.)
      *   icon, title    - ícono y título mostrados en la interfaz
-     *   process        - proceso ACT que trabaja (ej. "Defusión Cognitiva", "Aceptación")
+     *   process        - proceso ACT que trabaja (ej. "Defusión cognitiva", "Aceptación")
      *   tiempo         - duración estimada mostrada al usuario
      *   objective      - objetivo terapéutico de la actividad
      *   expectedOutcome- resultado esperado tras completarla
@@ -4345,14 +4345,14 @@
      */
     const EXERCISES = [
       {
-        id: 'defusion', icon: '🍃', title: 'Hojas en el Río', process: 'Defusión Cognitiva', tiempo: '8 min',
+        id: 'defusion', icon: '🍃', title: 'Defusión cognitiva', actividad: 'Hojas en el Río', process: 'Wilson & Luciano (2002, cap. 9, pp. 216–220)', tiempo: '8 min',
         objective: 'Distanciamiento psicológico de los pensamientos automáticos',
         expectedOutcome: 'Reducir la credibilidad literal de los pensamientos negativos',
         evidence: 'Terapia de Aceptación y Compromiso (Hayes et al., 2006)',
         color: '#1a6b2a', colorLight: 'rgba(91,158,58,.1)',
         emociones: ['triste', 'ansioso', 'enojado', 'indiferente'],
         frase: '"No eres tus pensamientos. Eres quien los observa."',
-        intro: 'En la Defusión Cognitiva de ACT aprendemos a ver los pensamientos como lo que son: eventos mentales que van y vienen, como hojas flotando en un río. No tenemos que creerlos ni obedecerlos.',
+        intro: 'En la Defusión cognitiva de ACT aprendemos a ver los pensamientos como lo que son: eventos mentales que van y vienen, como hojas flotando en un río. No tenemos que creerlos ni obedecerlos.',
         pasos: [
           { tipo: 'texto', titulo: 'Prepárate', desc: 'Siéntate en un lugar tranquilo. Cierra los ojos 1 minuto y observa qué pensamientos aparecen sin intentar cambiarlos.' },
           { tipo: 'reflexion', titulo: 'Identifica el pensamiento', label: '¿Qué pensamiento difícil apareció hoy?', placeholder: 'Escribe ese pensamiento tal cual vino a tu mente...', min: 15, rows: 3 },
@@ -4363,7 +4363,7 @@
       },
 
       {
-        id: 'aceptacion', icon: '🫁', title: 'Respiración y Aceptación', process: 'Aceptación', tiempo: '6 min',
+        id: 'aceptacion', icon: '🤲', title: 'Aceptación', actividad: 'Respiración y Aceptación', process: 'Wilson & Luciano (2002)', tiempo: '6 min',
         objective: 'Apertura a las sensaciones fisiológicas sin control',
         expectedOutcome: 'Disminución de la reatividad y lucha ante la ansiedad',
         evidence: 'ACBS Hexaflex, Aceptación experiencial',
@@ -4380,7 +4380,7 @@
       },
 
       {
-        id: 'yo', icon: '⛰️', title: 'Mi Yo Firme', process: 'Yo como Contexto', tiempo: '10 min',
+        id: 'yo', icon: '⛰️', title: 'Yo como contexto', actividad: 'Mi Yo Firme', process: 'Wilson & Luciano (2002)', tiempo: '10 min',
         objective: 'Conexión con el ser observador trascendente',
         expectedOutcome: 'Aumento de la flexibilidad y estabilidad del self',
         evidence: 'Self-as-context framework (Hayes et al., 2011)',
@@ -4398,7 +4398,7 @@
       },
 
       {
-        id: 'valores', icon: '🌱', title: 'Mis Valores', process: 'Clarificación de Valores', tiempo: '12 min',
+        id: 'valores', icon: '🧭', title: 'Clarificación de valores', actividad: 'Mis Valores', process: 'Wilson & Luciano (2002)', tiempo: '12 min',
         objective: 'Identificación de direcciones vitales elegidas',
         expectedOutcome: 'Conexión emocional y motivación por valores propios',
         evidence: 'ACT Values Formulation',
@@ -4416,7 +4416,7 @@
       },
 
       {
-        id: 'mandala', icon: '🎨', title: 'Mandala de Valores', process: 'Acción Comprometida', tiempo: '15 min',
+        id: 'mandala', icon: '👣', title: 'Acción comprometida', actividad: 'Mandala de Valores', process: 'Wilson & Luciano (2002, cap. 7, pp. 164–165)', tiempo: '15 min',
         objective: 'Expresión conductual y construcción de un producto de valor',
         expectedOutcome: 'Desarrollar consistencia entre la intención y el acto',
         evidence: 'Terapia de Acción (Moran, 2015) y arteterapia integral',
@@ -4434,7 +4434,7 @@
       },
 
       {
-        id: 'presente', icon: '🌤️', title: 'Momento Presente', process: 'Contacto con el Presente', tiempo: '7 min',
+        id: 'presente', icon: '🌅', title: 'Contacto con el momento presente', actividad: 'Momento Presente', process: 'Wilson & Luciano (2002)', tiempo: '7 min',
         objective: 'Atención defusionada y enfocada en el aquí y el ahora',
         expectedOutcome: 'Habilidad de grounding y reducción de rumia',
         evidence: 'Mindfulness in ACT, Grounding Techniques',
@@ -4476,7 +4476,7 @@
       { id: 'fotografo', icon: '📸', title: 'Artista visual', desc: 'Sube 5 imágenes', condicion: (s) => totalImgs(s) >= 5 },
       { id: 'explorador', icon: '🌈', title: 'Explorador ACT', desc: 'Completa los 6 ejercicios al menos 1 vez', condicion: (s) => ejerciciosUnicos(s) >= 6 },
       { id: 'guardian', icon: '🏆', title: 'Guardián de valores', desc: 'Completa Valores 5 veces', condicion: (s) => ejCount(s, 'valores') >= 5 },
-      { id: 'presente5', icon: '🧘', title: 'Maestro presente', desc: 'Completa Momento Presente 7 veces', condicion: (s) => ejCount(s, 'presente') >= 7 },
+      { id: 'presente5', icon: '🧘', title: 'Maestro presente', desc: 'Completa Contacto con el momento presente 7 veces', condicion: (s) => ejCount(s, 'presente') >= 7 },
       { id: '100pts', icon: '⭐', title: '100 puntos', desc: 'Acumula 100 puntos', condicion: (s, streak, pts) => pts >= 100 }
     ];
 
@@ -5812,10 +5812,10 @@
       <button class="ex-header-back" onclick="showScreen('screen-dashboard')">← Volver</button>
       <div class="ex-header-body">
         <span class="ex-header-icon">${ex.icon}</span>
-        <div class="ex-header-title">${ex.title}</div>
+        <div class="ex-header-title">${ex.actividad || ex.title}</div>
         <div class="ex-header-meta">
           <span>⏱ ${ex.tiempo}</span>
-          <span>🧠 ${ex.process}</span>
+          <span>📖 ${ex.process}</span>
         </div>
         <span class="ex-process-badge">${ex.process}</span>
         <div class="ex-progress-wrap"><div class="ex-progress-fill" id="ex-prog-fill"></div></div>
@@ -6350,7 +6350,7 @@
       <p style="font-size:14px;color:var(--txt2);margin-bottom:20px;line-height:1.6">${msg}</p>
 
       <div style="background:linear-gradient(135deg,var(--azul),var(--azul-m));border-radius:var(--r);padding:18px;color:#fff;margin-bottom:20px;display:inline-block;min-width:200px">
-        <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${ex.icon} ${ex.title}</div>
+        <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${ex.icon} ${ex.actividad || ex.title}</div>
         <div style="font-size:2.2rem;font-weight:900;color:var(--amarillo)">+${pts}</div>
         <div style="font-size:12px;opacity:.75">puntos ganados</div>
       </div>
