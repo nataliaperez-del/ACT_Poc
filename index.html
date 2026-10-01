@@ -668,6 +668,40 @@
       opacity: .7
     }
 
+    /* Admin: botón pequeño bajo las tarjetas de Estudiante y Docente */
+    .role-admin-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 0
+    }
+
+    .role-card.role-admin-mini {
+      display: inline;
+      min-height: 0;
+      padding: 2px 6px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      font-size: 11px;
+      color: var(--txt2);
+      opacity: .45;
+      transition: opacity .2s
+    }
+
+    .role-card.role-admin-mini:hover {
+      transform: none;
+      box-shadow: none;
+      opacity: .9
+    }
+
+    .role-card.role-admin-mini.selected {
+      background: transparent;
+      color: var(--azul);
+      opacity: 1;
+      font-weight: 700;
+      text-decoration: underline
+    }
+
     /* ═══════════════════════════════════════════
    EMOTIONS — CHECK-IN INMERSIVO
 ═══════════════════════════════════════════ */
@@ -3594,11 +3628,6 @@
               <span class="r-name">Docente</span>
               <span class="r-desc">Panel de seguimiento</span>
             </div>
-            <div class="role-card" data-role="administrador">
-              <span class="r-icon">🛠️</span>
-              <span class="r-name">Admin</span>
-              <span class="r-desc">Gestión del sistema</span>
-            </div>
           </div>
 
           <div class="form-group" id="role-pin-block" style="display:none;margin-top:8px">
@@ -3615,6 +3644,9 @@
           <p style="text-align:center;font-size:12px;color:var(--txt2);margin-top:14px">
             🔒 Tus datos se guardan solo en este dispositivo
           </p>
+          <div class="role-admin-wrap">
+            <span class="role-card role-admin-mini" data-role="administrador" role="button" tabindex="0">Admin</span>
+          </div>
         </div>
       </div>
 
@@ -3636,7 +3668,9 @@
             </p>
             <p style="margin-top:8px"><strong>2. Privacidad:</strong> Tus datos (check-ins, reflexiones e imágenes) se
               guardan primero en tu dispositivo. Si tu docente activa la sincronización en línea, estos datos también
-              se envían a un servidor institucional para que tu docente pueda ver tus estadísticas pseudonimizadas.
+              se envían a un servidor institucional para que tu docente pueda ver tus estadísticas. El archivo JSON que
+              entregues a tu docente o al administrador incluye tu nombre y cédula reales (los que registras abajo) y
+              el registro de tus acciones en la aplicación, para poder hacer trazabilidad del uso del sistema.
               Esta es una prueba de concepto: aún no cuenta con cifrado ni con un mecanismo formal para ejercer tus
               derechos de Habeas Data (Ley 1581 de 2012).</p>
             <p style="margin-top:8px"><strong>3. Alertas:</strong> Si el sistema detecta patrones de riesgo repetidos
@@ -3644,9 +3678,9 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="consent-name-input">Tu nombre <span class="req">*</span> <span
-                class="opt">(o un alias, si prefieres)</span></label>
-            <input type="text" id="consent-name-input" class="form-input" placeholder="Ej: Laura M." maxlength="60"
+            <label class="form-label" for="consent-name-input">Tu nombre completo real <span class="req">*</span> <span
+                class="opt">(el mismo de tu documento)</span></label>
+            <input type="text" id="consent-name-input" class="form-input" placeholder="Ej: Laura Martínez Gómez" maxlength="60"
               autocomplete="name">
             <div class="form-hint" id="consent-name-err" style="display:none;color:#E53E3E;font-style:normal">
               Escribe tu nombre para continuar.
@@ -3655,7 +3689,7 @@
 
           <div class="form-group">
             <label class="form-label" for="consent-cedula-input">Cédula <span class="req">*</span></label>
-            <input type="text" id="consent-cedula-input" class="form-input" placeholder="Ej: 1015XXXXXX"
+            <input type="text" id="consent-cedula-input" class="form-input" placeholder="Número de cédula real"
               maxlength="20" inputmode="numeric" autocomplete="off">
             <div class="form-hint" id="consent-cedula-err" style="display:none;color:#E53E3E;font-style:normal">
               Escribe tu número de cédula para continuar.
@@ -4039,21 +4073,37 @@
             <div class="gal-grid" id="teacher-gallery"></div>
           </div>
 
+          <!-- PDFs por actividad (Docente): elige qué PDFs verá el estudiante y descarga el HTML para distribuir -->
+          <div class="card" id="vault-teacher-card" style="display:none">
+            <h3 class="section-title">📚 PDFs que verá el estudiante en cada actividad</h3>
+            <div id="vault-teacher-body"></div>
+          </div>
+
           <!-- TRAZABILIDAD (solo Administrador): quién cargó / quién descargó recursos -->
           <div class="card" id="audit-card" style="display:none">
-            <h3 class="section-title">🔍 Trazabilidad de recursos (cargas y descargas)</h3>
-            <p style="font-size:12px;color:var(--txt2);margin-bottom:12px">Consolidado de fecha, usuario, rol y acción para armar el informe final de uso del sistema.</p>
+            <h3 class="section-title">🔍 Trazabilidad del sistema (administrador, docentes y estudiantes)</h3>
+            <p style="font-size:12px;color:var(--txt2);margin-bottom:12px">Qué hizo cada perfil, cómo lo hizo, y cuándo (fecha y hora). Los eventos de los estudiantes llegan con el JSON que entregan; los de los docentes, con el HTML que distribuyen.</p>
             <div class="grid-3" style="gap:10px;margin-bottom:12px" id="audit-stats"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <select id="audit-filter-role" class="form-input" style="width:auto;padding:6px 10px;font-size:12px" aria-label="Filtrar por rol">
+                <option value="">Todos los roles</option>
+                <option value="estudiante">Estudiantes</option>
+                <option value="profesor">Docentes</option>
+                <option value="administrador">Administrador</option>
+              </select>
+              <input id="audit-filter-text" class="form-input" style="width:auto;flex:1;min-width:140px;padding:6px 10px;font-size:12px" placeholder="Buscar usuario, acción, archivo…" aria-label="Buscar en la trazabilidad">
+            </div>
             <div class="table-wrap">
               <table class="data-table" aria-label="Tabla de trazabilidad">
                 <thead>
                   <tr>
-                    <th>Fecha</th>
+                    <th>Fecha y hora</th>
                     <th>Usuario</th>
                     <th>Rol</th>
-                    <th>Acción</th>
-                    <th>Módulo</th>
+                    <th>Qué hizo</th>
+                    <th>Actividad</th>
                     <th>Archivo</th>
+                    <th>Cómo lo hizo</th>
                   </tr>
                 </thead>
                 <tbody id="audit-log-body"></tbody>
@@ -4095,6 +4145,9 @@
   <!-- Única fuente de guías PDF/imagen/Word: JSON embebido en este index (sin localStorage).
        Se actualiza al subir/eliminar; al descargar el index, los PDFs viajan dentro del archivo. -->
   <script type="application/json" id="embedded-docs-data">{}</script>
+  <script type="application/json" id="pdf-vault-data"></script>
+  <!-- Trazabilidad que viaja dentro del HTML (admin → docente → estudiante); se fusiona al abrir -->
+  <script type="application/json" id="embedded-audit-data">[]</script>
 
   <script>
     /**
@@ -4133,7 +4186,7 @@
     const MAX_DOC_MB = 2; // límite duro: el recurso se guarda en base64 dentro del index
     const MAX_DOCS_PER_EX = 2; // máximo de recursos (PDF/imagen/Word) por actividad
     const DEFAULT_PIN_DOCENTE = 'UNADDOCENTE2026'; // PIN por defecto para el rol docente (se puede cambiar desde configuración)
-    const DEFAULT_PIN_ADMIN = 'UNADADMIN2026'; // PIN por defecto para el rol administrador
+    const DEFAULT_PIN_ADMIN = 'ADMIN2027'; // PIN por defecto para el rol administrador
 
     /*
      * Catálogo de emociones seleccionables en el check-in emocional.
@@ -4518,12 +4571,75 @@
        Solo visible/consolidado en el panel de Administrador.
     ============================================================ */
     const AUDIT_KEY = 'activa_audit_v1';
-    const AUDIT_MAX = 1000; // tope de eventos guardados (evita crecer sin límite en localStorage)
+    const AUDIT_MAX = 3000; // tope de eventos guardados (evita crecer sin límite en localStorage)
 
     function getAudit() {
       try { return JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]'); }
       catch { return []; }
     }
+
+    /** Etiqueta legible de cada acción registrada en la trazabilidad. */
+    const AUDIT_LABELS = {
+      ingreso: '🔑 Ingresó al sistema',
+      carga: '⬆️ Cargó una guía',
+      descarga: '⬇️ Descargó una guía',
+      pdf_uploaded: '⬆️ Cargó un PDF a la biblioteca',
+      pdf_deleted: '🗑️ Eliminó un PDF de la biblioteca',
+      pdf_assigned: '🎯 Asignó un PDF a una actividad',
+      pdf_unassigned: '↩️ Quitó un PDF de una actividad',
+      pdf_downloaded: '⬇️ Descargó un PDF',
+      pdf_vault_exported: '💾 Descargó el HTML para distribuir',
+      pdf_vault_saved: '💾 Guardó el HTML (archivo vinculado)',
+      pdf_vault_imported: '📥 Importó los PDFs incrustados del HTML',
+      ejercicio_iniciado: '▶️ Inició una actividad',
+      ejercicio_completado: '✅ Completó una actividad',
+      json_exportado: '📤 Exportó su JSON de progreso',
+      json_importado: '📥 Importó JSON de estudiantes',
+      trazabilidad_importada: '📥 Recibió trazabilidad de otros perfiles'
+    };
+    /** @returns {string} texto legible de una acción de auditoría */
+    function auditLabel(action) { return AUDIT_LABELS[action] || action; }
+
+    /** Describe con qué navegador, origen y conexión se realizó la acción (el "cómo"). */
+    function auditVia() {
+      const ua = navigator.userAgent;
+      const nav = /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'Navegador';
+      return nav + ' · ' + (location.protocol === 'file:' ? 'archivo local' : 'web') + ' · ' + (navigator.onLine ? 'con conexión' : 'sin conexión');
+    }
+
+    /**
+     * Fusiona eventos de trazabilidad recibidos (del HTML incrustado o del JSON de otro
+     * perfil) con el log local, sin duplicados (por id) y ordenados por fecha.
+     * @param {Array<object>} events
+     * @returns {number} cuántos eventos nuevos se agregaron
+     */
+    function mergeAudit(events) {
+      if (!Array.isArray(events) || !events.length) return 0;
+      try {
+        const list = getAudit(); const ids = new Set(list.map(e => e.id)); let added = 0;
+        for (const e of events) {
+          if (!e || typeof e !== 'object' || !e.ts || !e.action) continue;
+          if (!e.id) e.id = 'x-' + e.ts + '-' + e.action + '-' + (e.actor || '') + '-' + (e.fileName || '');
+          if (ids.has(e.id)) continue;
+          ids.add(e.id); list.push(e); added++;
+        }
+        if (added) {
+          list.sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0));
+          while (list.length > AUDIT_MAX) list.shift();
+          localStorage.setItem(AUDIT_KEY, JSON.stringify(list));
+        }
+        return added;
+      } catch (err) { console.error('No se pudo fusionar la trazabilidad:', err); return 0; }
+    }
+
+    /** Al abrir el HTML, incorpora la trazabilidad que viaja dentro del archivo (admin → docente → estudiante). */
+    function importEmbeddedAudit() {
+      try {
+        const el = document.getElementById('embedded-audit-data');
+        return el ? mergeAudit(JSON.parse(el.textContent || '[]')) : 0;
+      } catch { return 0; }
+    }
+    importEmbeddedAudit();
 
     /**
      * Registra un evento de auditoría (carga o descarga de un recurso) en localStorage.
@@ -4536,17 +4652,21 @@
      * @param {string} actorRole - rol de quien realizó la acción
      * Efecto: escribe en localStorage (AUDIT_KEY).
      */
-    function logAuditEvent(action, exId, fileName, actorName, actorRole) {
+    function logAuditEvent(action, exId, fileName, actorName, actorRole, detail) {
       try {
         const list = getAudit();
         const ex = EXERCISES.find(e => e.id === exId);
         list.push({
+          id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2),
           ts: new Date().toISOString(),
-          action, // 'carga' | 'descarga'
-          exId, exTitle: ex ? ex.title : exId,
+          action, // ver AUDIT_LABELS
+          exId, exTitle: ex ? ex.title : (exId || ''),
           fileName: fileName || '',
           actor: actorName || '—',
-          role: actorRole || '—'
+          actorId: (state && state.user && state.user.id) || '',
+          role: actorRole || '—',
+          detail: detail || '',
+          via: auditVia()
         });
         while (list.length > AUDIT_MAX) list.shift(); // descarta lo más antiguo
         localStorage.setItem(AUDIT_KEY, JSON.stringify(list));
@@ -4559,7 +4679,7 @@
     // Se llama desde el botón de descarga del estudiante (rol_estudiante, dentro de la actividad)
     function logResourceDownload(exId, fileName) {
       const name = state.user?.nombre || 'Estudiante';
-      logAuditEvent('descarga', exId, fileName, name, 'estudiante');
+      logAuditEvent('descarga', exId, fileName, name, 'estudiante', 'Botón de descarga de la guía dentro de la actividad');
     }
 
     /* ============================================================
@@ -4857,7 +4977,7 @@
         docs2[exId] = list;
         if (setDocs(docs2)) {
           toast('📎 Guía incrustada en el index');
-          logAuditEvent('carga', exId, file.name, (getConfig().nombreDocente || 'Docente'), (state.mode || 'profesor'));
+          logAuditEvent('carga', exId, file.name, (getConfig().nombreDocente || 'Docente'), (state.mode || 'profesor'), 'Carga de guía desde el panel (' + Math.round(file.size / 1024) + ' KB)');
           renderDocsPanel();
         }
       };
@@ -5227,6 +5347,10 @@
      * Efecto: localStorage (setConfig al crear PIN), sessionStorage (state), DOM, toast/alert.
      */
     // Utilizada en btn-continue-role y btn-accept-consent
+    /** Nombre con el que se registra en la trazabilidad a un docente o administrador. */
+    function staffActorName(rol) {
+      return rol === 'administrador' ? 'Administrador' : (getConfig().nombreDocente || 'Docente');
+    }
     function handleRoleSelection() {
       if (!selectedRole) { alert('Selecciona un rol primero'); return; }
       if (selectedRole === 'profesor' || selectedRole === 'administrador') {
@@ -5246,6 +5370,7 @@
           setConfig(cfg);
           toast('🔑 PIN de ' + (selectedRole === 'profesor' ? 'Docente' : 'Administrador') + ' creado. Guárdalo, lo necesitarás la próxima vez.');
           state.mode = selectedRole; saveState();
+          logAuditEvent('ingreso', '', '', staffActorName(selectedRole), selectedRole, 'Creó su PIN e ingresó al panel');
           buildTeacher(); showScreen('screen-teacher');
           return;
         }
@@ -5254,6 +5379,7 @@
         if (entered === targetPin) {
           if (pinErr) pinErr.style.display = 'none';
           state.mode = selectedRole; saveState();
+          logAuditEvent('ingreso', '', '', staffActorName(selectedRole), selectedRole, 'Ingreso al panel con PIN');
           buildTeacher(); showScreen('screen-teacher');
         } else {
           showErr('PIN incorrecto. Verifica el código (o contacta al administrador si lo olvidaste).');
@@ -5314,6 +5440,7 @@
         user.consentDate = new Date().toISOString();
         saveUser(user);
         state.mode = selectedRole; saveState();
+        logAuditEvent('ingreso', '', '', user.nombre, 'estudiante', 'Aceptó el consentimiento e ingresó');
         buildCheckin(); showScreen('screen-checkin');
       });
 
@@ -6130,6 +6257,8 @@
 
           saveUser(user);
           state.points = user.puntos; saveState(); updateHeaderPoints();
+          logAuditEvent('ejercicio_completado', ex.id, '', user.nombre, 'estudiante',
+            'Emoción final: ' + finalEmotion + ' · Valoración: ' + rating + '/10 · ' + pts + ' puntos' + (imgBase64 ? ' · con imagen' : '') + (reflexionTexto ? ' · con reflexión' : ''));
           checkLogros(user);
 
           if (btn) { btn.innerHTML = '✅ ¡Guardado! +' + pts + ' puntos'; btn.classList.add('celebrating'); }
@@ -6866,37 +6995,43 @@ EMOCIONES REGISTRADAS:
       if (!isAdmin) { card.style.display = 'none'; return; }
       card.style.display = '';
 
-      const log = getAudit().slice().reverse(); // más reciente primero
-      const cargas = log.filter(e => e.action === 'carga').length;
-      const descargas = log.filter(e => e.action === 'descarga').length;
+      const all = getAudit().slice().reverse(); // más reciente primero
+      const fRole = document.getElementById('audit-filter-role')?.value || '';
+      const fText = (document.getElementById('audit-filter-text')?.value || '').toLowerCase().trim();
+      const log = all.filter(e => (!fRole || e.role === fRole) &&
+        (!fText || [e.actor, auditLabel(e.action), e.exTitle, e.fileName, e.detail, e.via].join(' ').toLowerCase().includes(fText)));
+      const porRol = r => all.filter(e => e.role === r).length;
 
       document.getElementById('audit-stats').innerHTML = `
-    <div class="stat-chip"><span class="stat-val">${cargas}</span><span class="stat-lbl">Recursos cargados</span></div>
-    <div class="stat-chip"><span class="stat-val">${descargas}</span><span class="stat-lbl">Descargas de estudiantes</span></div>
-    <div class="stat-chip"><span class="stat-val">${log.length}</span><span class="stat-lbl">Eventos registrados</span></div>`;
+    <div class="stat-chip"><span class="stat-val">${porRol('estudiante')}</span><span class="stat-lbl">Eventos de estudiantes</span></div>
+    <div class="stat-chip"><span class="stat-val">${porRol('profesor')}</span><span class="stat-lbl">Eventos de docentes</span></div>
+    <div class="stat-chip"><span class="stat-val">${porRol('administrador')}</span><span class="stat-lbl">Eventos del administrador</span></div>`;
 
       const tbody = document.getElementById('audit-log-body');
       if (!log.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--txt2)">Sin eventos registrados todavía.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--txt2)">Sin eventos registrados todavía.</td></tr>';
         return;
       }
       tbody.innerHTML = log.map(e => {
-        const fecha = new Date(e.ts).toLocaleString('es-CO');
-        const accionLabel = e.action === 'carga' ? '⬆️ Cargó' : '⬇️ Descargó';
-        return `<tr><td>${fecha}</td><td>${escHtml(e.actor)}</td><td>${escHtml(e.role)}</td><td>${accionLabel}</td><td>${escHtml(e.exTitle)}</td><td>${escHtml(e.fileName)}</td></tr>`;
+        const fecha = new Date(e.ts).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'medium' });
+        const como = [e.detail, e.via].filter(Boolean).join(' — ');
+        return `<tr><td>${fecha}</td><td>${escHtml(e.actor)}</td><td>${escHtml(e.role)}</td><td>${escHtml(auditLabel(e.action))}</td><td>${escHtml(e.exTitle || '')}</td><td>${escHtml(e.fileName || '')}</td><td style="font-size:12px">${escHtml(como)}</td></tr>`;
       }).join('');
     }
+    ['audit-filter-role', 'audit-filter-text'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(id.endsWith('role') ? 'change' : 'input', () => renderAuditPanel(state.mode === 'administrador'));
+    });
 
     /** Convierte el log de auditoría a una matriz de filas (con encabezado) lista para exportar a Excel. @returns {Array<Array<string>>} */
     function auditReportRows() {
       const log = getAudit().slice().reverse();
-      const rows = [['Fecha', 'Usuario', 'Rol', 'Acción', 'Módulo', 'Archivo']];
+      const rows = [['Fecha y hora', 'Usuario', 'Rol', 'Qué hizo', 'Actividad', 'Archivo', 'Detalle', 'Cómo (navegador · origen · conexión)']];
       log.forEach(e => {
         rows.push([
-          new Date(e.ts).toLocaleString('es-CO'),
-          e.actor, e.role,
-          e.action === 'carga' ? 'Cargó' : 'Descargó',
-          e.exTitle, e.fileName
+          new Date(e.ts).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'medium' }),
+          e.actor, e.role, auditLabel(e.action),
+          e.exTitle || '', e.fileName || '', e.detail || '', e.via || ''
         ]);
       });
       return rows;
@@ -6912,8 +7047,9 @@ EMOCIONES REGISTRADAS:
     function buildAuditReportHtml() {
       const cfg = getConfig();
       const log = getAudit().slice().reverse();
-      const cargas = log.filter(e => e.action === 'carga').length;
-      const descargas = log.filter(e => e.action === 'descarga').length;
+      const nEst = log.filter(e => e.role === 'estudiante').length;
+      const nDoc = log.filter(e => e.role === 'profesor').length;
+      const nAdm = log.filter(e => e.role === 'administrador').length;
       let html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Informe de Trazabilidad — ACTiva Arte</title>
   <style>body{font-family:Arial,sans-serif;max-width:900px;margin:40px auto;padding:20px;color:#1A1A2E;}
   h1{color:#003B71;border-bottom:3px solid #F2A900;padding-bottom:8px;}
@@ -6922,10 +7058,10 @@ EMOCIONES REGISTRADAS:
   .badge{background:#5B9E3A;color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;}</style></head><body>
   <h1>Informe de trazabilidad — ${cfg.grupoNombre}</h1>
   <p><strong>Generado:</strong> ${new Date().toLocaleString('es-CO')}</p>
-  <p><span class="badge">${cargas} cargas</span> &nbsp; <span class="badge">${descargas} descargas</span> &nbsp; <span class="badge">${log.length} eventos</span></p>
-  <table><thead><tr><th>Fecha</th><th>Usuario</th><th>Rol</th><th>Acción</th><th>Módulo</th><th>Archivo</th></tr></thead><tbody>`;
+  <p><span class="badge">${nEst} estudiantes</span> &nbsp; <span class="badge">${nDoc} docentes</span> &nbsp; <span class="badge">${nAdm} administrador</span> &nbsp; <span class="badge">${log.length} eventos</span></p>
+  <table><thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Rol</th><th>Qué hizo</th><th>Actividad</th><th>Archivo</th><th>Cómo lo hizo</th></tr></thead><tbody>`;
       log.forEach(e => {
-        html += `<tr><td>${new Date(e.ts).toLocaleString('es-CO')}</td><td>${escHtml(e.actor)}</td><td>${escHtml(e.role)}</td><td>${e.action === 'carga' ? 'Cargó' : 'Descargó'}</td><td>${escHtml(e.exTitle)}</td><td>${escHtml(e.fileName)}</td></tr>`;
+        html += `<tr><td>${new Date(e.ts).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'medium' })}</td><td>${escHtml(e.actor)}</td><td>${escHtml(e.role)}</td><td>${escHtml(auditLabel(e.action))}</td><td>${escHtml(e.exTitle || '')}</td><td>${escHtml(e.fileName || '')}</td><td>${escHtml([e.detail, e.via].filter(Boolean).join(' — '))}</td></tr>`;
       });
       html += `</tbody></table></body></html>`;
       return html;
@@ -7385,22 +7521,28 @@ EMOCIONES REGISTRADAS:
       exportIndexHtmlFile('ACTivaArte_UNAD_offline.html', '💾 App descargada con guías incluidas');
     }
 
+    /** Convierte un texto en un fragmento seguro para nombre de archivo (sin caracteres inválidos, espacios → guion bajo). */
+    function fileSafe(txt) {
+      return String(txt || '').normalize('NFC').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '').trim().replace(/\s+/g, '_').slice(0, 60);
+    }
+
     /**
-     * Exporta el progreso del usuario activo como archivo .json, pseudonimizando
-     * su nombre (pseudoHash) para no incluir datos identificables directos en el
-     * archivo exportado. Pensado para entregar manualmente al docente cuando no
-     * hay servidor configurado.
+     * Exporta el progreso del usuario activo como archivo .json con su nombre y
+     * cédula reales (los del consentimiento informado), para que el administrador
+     * pueda identificar y trazar a cada estudiante. El archivo se descarga ya
+     * nombrado con su nombre y cédula, e incluye la trazabilidad completa del
+     * dispositivo. Pensado para entregar manualmente al docente/administrador.
      * Efecto: dispara una descarga de archivo, muestra un toast.
      */
     function exportMyJson() {
       const user = getUserById(state.user?.id); if (!user) { toast('⚠️ Inicia sesión primero'); return }
-      const publicId = pseudoHash(user.id + user.nombre);
-      const exportedUser = JSON.parse(JSON.stringify(user));
-      exportedUser.nombre = publicId; // Pseudonimización del JSON exportado
-      const exp = { exportado_por: publicId, version: APP_VER, fecha_exportacion: new Date().toISOString(), usuarios: [exportedUser] };
+      const fileName = 'ACTivaArte_' + fileSafe(user.nombre) + '_' + fileSafe(user.cedula) + '_' + new Date().toISOString().slice(0, 10) + '.json';
+      logAuditEvent('json_exportado', '', fileName, user.nombre, 'estudiante', 'Botón "Exportar mi JSON" para entregar al docente (cédula ' + (user.cedula || 's/d') + ')');
+      // Trazabilidad completa que este dispositivo conoce (administrador, docente y estudiante)
+      const exp = { exportado_por: { nombre: user.nombre, cedula: user.cedula || '' }, version: APP_VER, fecha_exportacion: new Date().toISOString(), usuarios: [JSON.parse(JSON.stringify(user))], trazabilidad: getAudit() };
       const blob = new Blob([JSON.stringify(exp, null, 2)], { type: 'application/json' }); const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob); a.download = 'ACTivaArte_' + publicId + '_' + new Date().toISOString().slice(0, 10) + '.json';
-      a.click(); URL.revokeObjectURL(a.href); toast('📤 JSON privado exportado')
+      a.href = URL.createObjectURL(blob); a.download = fileName;
+      a.click(); URL.revokeObjectURL(a.href); toast('📤 JSON exportado: ' + fileName)
     }
 
     /** Pide por prompt() la URL del servidor GAS y la guarda en localStorage. Efecto: localStorage, refresca UI de sync, toast. */
@@ -7457,6 +7599,7 @@ EMOCIONES REGISTRADAS:
           try {
             const p = JSON.parse(e.target.result); if (!p.usuarios || !Array.isArray(p.usuarios)) throw new Error('Falta "usuarios"');
             let nu = 0, na = 0, ns = 0; p.usuarios.forEach(u => { const x = srvMerge(u); if (x) { if (x.nuevo) nu++; else na++; ns += x.ses } });
+            mergeAudit(p.trazabilidad);
             srvD.n++; saveSrv(); res({ file: file.name, nu, na, ns })
           } catch (err) { rej({ file: file.name, err: err.message }) }
         }; r.onerror = () => rej({ file: file.name, err: 'Error lectura' }); r.readAsText(file, 'utf-8')
@@ -7571,6 +7714,8 @@ EMOCIONES REGISTRADAS:
               try {
                 const p = JSON.parse(e.target.result);
                 if (!p.usuarios || !Array.isArray(p.usuarios)) throw new Error('Falta "usuarios"');
+                const nuevosEv = mergeAudit(p.trazabilidad); // trazabilidad completa que trae el estudiante
+                if (nuevosEv) logAuditEvent('trazabilidad_importada', '', file.name, staffActorName(state.mode || 'profesor'), state.mode || 'profesor', nuevosEv + ' evento(s) nuevos de ' + ((p.exportado_por && p.exportado_por.nombre) || p.exportado_por || 'un estudiante'));
                 p.usuarios.forEach(inc => {
                   const d = getUsers();
                   const idx = d.usuarios.findIndex(u => u.id === inc.id || u.nombre.toLowerCase().trim() === inc.nombre.toLowerCase().trim());
@@ -7671,6 +7816,213 @@ EMOCIONES REGISTRADAS:
 
 
   </script>
+<script id="vault-module">
+/* ===== BÓVEDA DE PDFs (independiente de embedded-docs-data) ===== */
+(function(){
+'use strict';
+const MAX_PDF_BYTES=2*1024*1024, MAX_VAULT_BYTES=24*1024*1024, MAX_PDFS_PER_ACTIVITY=2, MAX_ACTIVITIES=6, MAX_TOTAL_PDFS=12;
+const DB='ACTivaArtePDFVault', EMB='pdf-vault-data';
+const rol=()=> (state&&state.mode)||''; // 'estudiante' | 'profesor' | 'administrador' (los perfiles de personal no tienen state.user)
+const canManage=()=>rol()==='administrador'; // solo el administrador carga/elimina PDFs
+const canDistribute=()=>rol()==='profesor'||rol()==='administrador'; // el docente descarga el HTML y lo distribuye
+const mb=b=>(b/1048576).toFixed(2)+' MB';
+let _db;
+function openPdfVaultDB(){ if(_db) return _db; _db=new Promise((res,rej)=>{ if(!window.indexedDB) return rej(new Error('IndexedDB no disponible'));
+  const r=indexedDB.open(DB,1); r.onupgradeneeded=()=>{const d=r.result; d.createObjectStore('pdfs',{keyPath:'id'}); d.createObjectStore('meta',{keyPath:'k'});};
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);}); return _db; }
+async function tx(store,mode,fn){ const d=await openPdfVaultDB(); return new Promise((res,rej)=>{ const t=d.transaction(store,mode), s=t.objectStore(store); const q=fn(s); t.oncomplete=()=>res(q&&q.result); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error); }); }
+const getVaultFiles=()=>tx('pdfs','readonly',s=>s.getAll()).then(a=>a||[]);
+const getVaultPdf=id=>tx('pdfs','readonly',s=>s.get(id));
+const putRec=r=>tx('pdfs','readwrite',s=>s.put(r));
+const delRec=id=>tx('pdfs','readwrite',s=>s.delete(id));
+const getMeta=k=>tx('meta','readonly',s=>s.get(k)).then(r=>r&&r.v);
+const setMeta=(k,v)=>tx('meta','readwrite',s=>s.put({k,v}));
+async function sha256(blob){ try{ if(!crypto.subtle) return ''; const h=await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()); return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join(''); }catch(e){return '';} }
+async function getVaultStats(){ const f=await getVaultFiles(), used=f.reduce((a,x)=>a+x.size,0); return {files:f,count:f.length,used,available:Math.max(0,MAX_VAULT_BYTES-used)}; }
+function friendly(e){ const n=(e&&e.name)||''; if(n==='QuotaExceededError') return 'El navegador no tiene espacio suficiente para guardar el PDF.'; return (e&&e.message)||'Error inesperado en la bóveda.'; }
+function audit(a,ex,name,detail){ try{ const r=rol(); logAuditEvent(a,ex,name,(state.user&&state.user.nombre)||(r?staffActorName(r):'Sistema (al abrir el HTML)'),r,detail); }catch(e){} }
+/* ---- Asignación de PDFs a actividades: {exerciseId:[pdfId,...]} (máx. 2 por actividad) ---- */
+async function getAssign(){ const a=await getMeta('assign'); return (a&&typeof a==='object')?a:{}; }
+async function migrateAssign(){ // PDFs antiguos que traían exerciseId pasan a la biblioteca + asignación
+  if(await getMeta('assign')) return; const a={}, f=await getVaultFiles();
+  for(const r of f) if(r.exerciseId){ (a[r.exerciseId]=a[r.exerciseId]||[]).push(r.id); r.exerciseId=''; await putRec(r); }
+  await setMeta('assign',a); }
+async function toggleAssign(exId,pdfId){
+  if(!canDistribute()) throw new Error('Sin permiso para asignar PDFs.');
+  if(!EXERCISES.some(e=>e.id===exId)) throw new Error('Actividad no válida.');
+  const a=await getAssign(), l=a[exId]||[], r=await getVaultPdf(pdfId); if(!r) throw new Error('PDF no disponible.');
+  if(l.includes(pdfId)) a[exId]=l.filter(x=>x!==pdfId);
+  else { if(l.length>=MAX_PDFS_PER_ACTIVITY) throw new Error('Esta actividad ya tiene 2 PDFs asignados. Quita uno antes de asignar otro.'); a[exId]=l.concat(pdfId); }
+  await setMeta('assign',a); await setMeta('dirty',true);
+  audit(a[exId].includes(pdfId)?'pdf_assigned':'pdf_unassigned',exId,r.name,'Casilla de selección de PDFs por actividad ('+a[exId].length+'/2 asignados)');
+  if(canManage()) scheduleSave(); }
+async function validatePdfFile(file){
+  if(!file||file.type!=='application/pdf'||!/\.pdf$/i.test(file.name)) throw new Error('Solo se aceptan archivos PDF (.pdf).');
+  const head=new TextDecoder().decode(await file.slice(0,5).arrayBuffer()); if(head!=='%PDF-') throw new Error('El archivo no es un PDF válido.');
+  if(file.size>MAX_PDF_BYTES) throw new Error('El PDF supera el límite máximo de 2 MB. Este archivo pesa '+(file.size/1048576).toFixed(3)+' MB y el límite permitido es de 2 MB.');
+  const st=await getVaultStats();
+  if(st.count>=MAX_TOTAL_PDFS) throw new Error('La biblioteca ya contiene el máximo de 12 PDFs permitidos.');
+  if(st.used+file.size>MAX_VAULT_BYTES) throw new Error('No hay suficiente espacio disponible en la bóveda. Espacio disponible: '+mb(st.available)+' · Archivo seleccionado: '+mb(file.size));
+  return st;
+}
+async function uploadVaultPdf(file){
+  if(!canManage()) throw new Error('Solo el administrador puede subir PDFs.');
+  await validatePdfFile(file);
+  const hash=await sha256(file), all=await getVaultFiles();
+  if(hash&&all.some(x=>x.hash===hash)) throw new Error('Este PDF ya está en la biblioteca.');
+  const now=new Date().toISOString();
+  await putRec({id:'pdf-'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2)),exerciseId:'',name:file.name,type:'application/pdf',size:file.size,blob:file,hash,uploadedAt:now,updatedAt:now,version:1,origin:'local'});
+  audit('pdf_uploaded','',file.name,'Botón "Agregar PDF a la biblioteca" ('+mb(file.size)+')'); scheduleSave();
+}
+async function deleteVaultPdf(id){
+  if(!canManage()) throw new Error('Solo el administrador puede eliminar PDFs.');
+  const r=await getVaultPdf(id); if(!r) return;
+  await delRec(id); const del=(await getMeta('deleted'))||[]; del.push(id); await setMeta('deleted',del);
+  const a=await getAssign(); for(const k of Object.keys(a)) a[k]=a[k].filter(x=>x!==id); await setMeta('assign',a);
+  audit('pdf_deleted','',r.name,'Botón "Eliminar" de la biblioteca ('+mb(r.size)+')'); scheduleSave();
+}
+async function openVaultPdf(id){ const r=await getVaultPdf(id); if(!r) return toast('⚠️ PDF no disponible');
+  const u=URL.createObjectURL(r.blob); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u),60000); }
+async function downloadVaultPdf(id){ const r=await getVaultPdf(id); if(!r) return toast('⚠️ PDF no disponible');
+  const u=URL.createObjectURL(r.blob), a=document.createElement('a'); a.href=u; a.download=r.name; a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); audit('pdf_downloaded',state.activeExercise||'',r.name,'Botón de descarga del PDF ('+mb(r.size)+')'); }
+/* ---- Exportación / restauración ---- */
+const b64=blob=>new Promise((res,rej)=>{const f=new FileReader(); f.onload=()=>res(f.result.split(',')[1]); f.onerror=rej; f.readAsDataURL(blob);});
+async function exportPdfVault(){ const f=await getVaultFiles(), el=document.getElementById(EMB); if(!el) return;
+  const items=[]; for(const r of f) items.push({id:r.id,exerciseId:r.exerciseId,name:r.name,size:r.size,hash:r.hash,uploadedAt:r.uploadedAt,updatedAt:r.updatedAt,version:r.version,data:await b64(r.blob)});
+  el.textContent=JSON.stringify({exportedAt:new Date().toISOString(),items}); }
+async function restoreEmbeddedPdfVault(){
+  const el=document.getElementById(EMB); if(!el) return; let d; try{d=JSON.parse(el.textContent||'null');}catch(e){return;}
+  if(!d||!Array.isArray(d.items)) return;
+  const last=await getMeta('embImport'); if(last&&last>=d.exportedAt) return; // ya importada: sin duplicados
+  const have=await getVaultFiles(), tomb=(await getMeta('deleted'))||[], ids=new Set(d.items.map(i=>i.id));
+  for(const r of have) if(r.origin==='embedded'&&!ids.has(r.id)) await delRec(r.id); // eliminado en la copia nueva
+  for(const i of d.items){ if(tomb.includes(i.id)||have.some(x=>x.id===i.id||(i.hash&&x.hash===i.hash&&x.exerciseId===i.exerciseId))) continue;
+    const bin=atob(i.data), u8=new Uint8Array(bin.length); for(let k=0;k<bin.length;k++) u8[k]=bin.charCodeAt(k);
+    await putRec({id:i.id,exerciseId:i.exerciseId,name:i.name,type:'application/pdf',size:u8.length,blob:new Blob([u8],{type:'application/pdf'}),hash:i.hash,uploadedAt:i.uploadedAt,updatedAt:i.updatedAt,version:i.version||1,origin:'embedded',syncedAt:new Date().toISOString()}); }
+  if(d.assign&&typeof d.assign==='object') await setMeta('assign',d.assign); // la distribución que trae el archivo
+  await setMeta('embImport',d.exportedAt); audit('pdf_vault_imported','', 'copia HTML',d.items.length+' PDF(s) incrustados cargados al abrir el HTML');
+}
+/* ---- Instantánea del HTML con los PDFs incrustados (sin tocar el DOM vivo) ---- */
+async function buildSnapshot(){
+  // Administrador: biblioteca completa. Docente: solo los PDFs asignados a actividades (HTML más liviano para el estudiante).
+  const assign=await getAssign(), used=new Set([].concat(...Object.values(assign)));
+  const f=(await getVaultFiles()).filter(r=>canManage()||used.has(r.id)), items=[];
+  for(const k of Object.keys(assign)) assign[k]=assign[k].filter(id=>f.some(r=>r.id===id));
+  for(const r of f) items.push({id:r.id,exerciseId:r.exerciseId,name:r.name,size:r.size,hash:r.hash,uploadedAt:r.uploadedAt,updatedAt:r.updatedAt,version:r.version,data:await b64(r.blob)});
+  const root=document.documentElement.cloneNode(true);
+  root.querySelectorAll('#vault-fab,#vault-ov,#vault-css,#vault-ex-panel').forEach(n=>n.remove());
+  const safe=o=>JSON.stringify(o).replace(/</g,'\\u003c'); // evita que un "<" dentro de los datos cierre la etiqueta de script
+  const emb=root.querySelector('#'+EMB); if(emb) emb.textContent=safe({exportedAt:new Date().toISOString(),items,assign});
+  const aud=root.querySelector('#embedded-audit-data'); if(aud) aud.textContent=safe(getAudit()); // la trazabilidad viaja con el HTML
+  return '<!DOCTYPE html>\n'+root.outerHTML;
+}
+function downloadSnapshot(html,fn){ const u=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})), a=document.createElement('a'); a.href=u; a.download=fn; a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); }
+/* exportación: mismo flujo de siempre, ahora con instantánea limpia */
+window.exportIndexHtmlFile=async function(fn,msg){
+  try{ syncEmbeddedDocs(getDocs()); }catch(e){}
+  const st=await getVaultStats().catch(()=>({count:0,used:0}));
+  if(st.used>12*1048576&&!confirm('La aplicación contiene varios archivos PDF. La copia HTML puede ser considerablemente más pesada que los originales y la exportación puede tardar unos segundos. ¿Continuar?')) return;
+  try{ audit('pdf_vault_exported','',fn,'Botón "Descargar HTML para distribuir" ('+st.count+' PDFs en la biblioteca)'); // se registra antes para que viaje dentro del archivo
+    downloadSnapshot(await buildSnapshot(),fn); toast(msg); }catch(e){ toast('⚠️ '+friendly(e)); } };
+/* ---- Guardado automático sobre el mismo archivo HTML (Chrome/Edge, File System Access API) ---- */
+const FS_OK=typeof window.showOpenFilePicker==='function';
+let _saveT, _saving=false, _pending=false;
+async function linkedHandle(){ try{ return await getMeta('fileHandle'); }catch(e){ return null; } }
+async function linkHtmlFile(){
+  if(!FS_OK) return alert('Tu navegador no permite guardar sobre el archivo. Usa Chrome o Edge, o "Descargar" para obtener el HTML actualizado.');
+  try{ const [h]=await showOpenFilePicker({types:[{description:'ACTivaArte (HTML)',accept:{'text/html':['.html','.htm']}}],multiple:false});
+    if(await h.requestPermission({mode:'readwrite'})!=='granted') return toast('⚠️ Permiso de escritura denegado');
+    await setMeta('fileHandle',h); toast('🔗 Archivo vinculado: '+h.name); await saveLinked(true); }
+  catch(e){ if(e&&e.name!=='AbortError') alert('⚠️ '+friendly(e)); }
+  renderPdfVault();
+}
+async function saveLinked(manual){
+  if(_saving){ _pending=true; return; } _saving=true;
+  try{
+    const h=await linkedHandle();
+    if(!h){ if(manual) toast('⚠️ Primero vincula el archivo'); return; }
+    let p=await h.queryPermission({mode:'readwrite'});
+    if(p!=='granted'&&manual) p=await h.requestPermission({mode:'readwrite'});
+    if(p!=='granted'){ await setMeta('dirty',true); toast('⚠️ Cambios sin guardar en el archivo. Abre la Bóveda y pulsa "Guardar en archivo".'); return; }
+    audit('pdf_vault_saved','',h.name,manual?'Botón "Guardar en archivo"':'Guardado automático tras cambiar la biblioteca');
+    const html=await buildSnapshot(), w=await h.createWritable(); await w.write(html); await w.close();
+    await setMeta('dirty',false); toast('💾 Archivo HTML actualizado con los PDFs');
+  }catch(e){ await setMeta('dirty',true).catch(()=>{}); toast('⚠️ No se pudo guardar en el archivo: '+friendly(e)); }
+  finally{ _saving=false; if(_pending){ _pending=false; scheduleSave(); } if(document.getElementById('vault-ov').style.display==='block') renderPdfVault(); }
+}
+function scheduleSave(){ clearTimeout(_saveT); _saveT=setTimeout(async()=>{
+  if(await linkedHandle()) return saveLinked(false);
+  await setMeta('dirty',true); toast(FS_OK?'ℹ️ PDF guardado. Vincula el archivo en la Bóveda para incrustarlo en el HTML.':'ℹ️ PDF guardado. Descarga el HTML actualizado desde la Bóveda.'); },1500); }
+Object.assign(window,{linkHtmlFile,saveLinked,toggleAssign,getAssign,buildSnapshot,restoreEmbeddedPdfVault});
+/* ---- Interfaz ---- */
+const css=document.createElement('style'); css.id='vault-css'; css.textContent=`
+#vault-fab{position:fixed;right:16px;bottom:16px;z-index:9000;display:none;background:var(--azul);color:#fff;border:0;border-radius:30px;padding:12px 18px;font-weight:700;box-shadow:var(--sombra-lg);cursor:pointer}
+#vault-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9001;display:none;overflow:auto;padding:12px}
+#vault-box{background:var(--fondo);max-width:900px;margin:0 auto;border-radius:var(--r);padding:18px;color:var(--txt)}
+.v-bar{height:12px;background:var(--borde);border-radius:8px;overflow:hidden}.v-bar i{display:block;height:100%;background:var(--verde)}
+.v-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+.v-card{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--r);padding:14px;box-shadow:var(--sombra)}
+.v-f{border-top:1px solid var(--borde);padding:8px 0;font-size:13px}.v-f button,.v-add{background:var(--azul-m);color:#fff;border:0;border-radius:var(--rs);padding:6px 10px;margin:4px 4px 0 0;cursor:pointer;font-size:12px}
+.v-f .v-del{background:#c0392b}.v-add{background:var(--verde);width:100%;padding:8px}`;
+document.head.appendChild(css);
+const fab=document.createElement('button'); fab.id='vault-fab'; fab.textContent='📚 Bóveda de PDFs'; fab.onclick=()=>{ov.style.display='block';renderPdfVault();};
+const ov=document.createElement('div'); ov.id='vault-ov'; ov.innerHTML='<div id="vault-box" role="dialog" aria-label="Bóveda de PDFs"></div>'; ov.onclick=e=>{if(e.target===ov)ov.style.display='none';};
+document.body.append(fab,ov);
+setInterval(()=>{fab.style.display=(state&&canManage())?'block':'none';},1000); // la Bóveda es solo del administrador
+async function renderPdfVault(){ const box=document.getElementById('vault-box'); let st;
+  try{st=await getVaultStats();}catch(e){box.innerHTML='<p>⚠️ '+escHtml(friendly(e))+'</p>';return;}
+  const pct=Math.min(100,st.used/MAX_VAULT_BYTES*100), m=canManage();
+  const assign=await getAssign();
+  const lh=await linkedHandle(), dirty=await getMeta('dirty').catch(()=>false);
+  const dl=`<button onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>`;
+  const fileBar=m?`<div class="v-f" style="margin:8px 0">${lh?'🔗 Vinculado: <b>'+escHtml(lh.name)+'</b> · '+(dirty?'⚠️ cambios sin guardar':'✅ al día'):(FS_OK?'⚠️ Sin archivo vinculado: los PDFs aún no se incrustan en el HTML.':'ℹ️ Este navegador no guarda sobre el archivo; descarga el HTML actualizado.')}<br>
+    ${FS_OK?`<button onclick="linkHtmlFile()">🔗 ${lh?'Cambiar archivo':'Vincular archivo HTML'}</button>`:''}${lh?`<button onclick="saveLinked(true)">💾 Guardar en archivo</button>`:''}${dl}</div>`
+    :(canDistribute()?`<div class="v-f" style="margin:8px 0">Los PDFs vienen incrustados en este archivo. Descárgalo para compartirlo con tus estudiantes.<br>${dl}</div>`:'');
+  box.innerHTML=`<div style="display:flex;justify-content:space-between"><h2 style="margin:0">📚 Bóveda de PDFs</h2><button class="v-add" style="width:auto" onclick="document.getElementById('vault-ov').style.display='none'" aria-label="Cerrar">✕</button></div>
+  <p style="margin:10px 0 4px">${mb(st.used)} / 24 MB · ${st.count} / ${MAX_TOTAL_PDFS} PDFs · Disponible: ${mb(st.available)}</p><div class="v-bar"><i style="width:${pct}%"></i></div>${fileBar}
+  <h3 style="margin:14px 0 4px">📁 Biblioteca de PDFs incrustados</h3>
+  <div class="v-card">`+(st.files.map(f=>`<div class="v-f">📕 <b>${escHtml(f.name)}</b><br>${mb(f.size)} · ${new Date(f.uploadedAt).toLocaleDateString('es-CO',{dateStyle:'long'})}<br>
+   <button onclick="vaultUI('open','${f.id}')">👁 Ver</button><button onclick="vaultUI('dl','${f.id}')">⬇ Descargar</button>${m?`<button class="v-del" onclick="vaultUI('del','${f.id}')">🗑 Eliminar</button>`:''}</div>`).join('')||'<div class="v-f" style="color:var(--txt2)">La biblioteca está vacía.</div>')+
+   (m?`<button class="v-add" ${st.count>=MAX_TOTAL_PDFS?'disabled title="Biblioteca llena"':''} onclick="vaultUI('add')">+ Agregar PDF a la biblioteca</button>`:'')+`</div>
+  <h3 style="margin:14px 0 4px">🎯 PDFs que verá el estudiante en cada actividad</h3>`+(canDistribute()?'<p style="font-size:12px;color:var(--txt2);margin:0 0 6px">Marca hasta 2 PDFs por actividad. El HTML que descargues solo incluirá los PDFs marcados.</p>':'')+
+  `<div class="v-grid">`+EXERCISES.map(ex=>{const ids=assign[ex.id]||[];
+   return `<div class="v-card"><b>${ex.icon} ${escHtml(ex.title)}</b><div style="font-size:12px;color:var(--txt2)">${ids.length} / 2 PDFs asignados</div>`+
+   (st.files.map(f=>`<label class="v-f" style="display:block;cursor:${canDistribute()?'pointer':'default'}"><input type="checkbox" ${ids.includes(f.id)?'checked':''} ${canDistribute()?'':'disabled'} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)}</label>`).join('')||'<div class="v-f" style="color:var(--txt2)">Sin PDFs en la biblioteca</div>')+`</div>`;}).join('')+'</div>'; }
+window.vaultUI=async(a,x,y)=>{ try{
+  if(a==='open') return openVaultPdf(x); if(a==='dl') return downloadVaultPdf(x);
+  if(a==='assign'){ try{ await toggleAssign(x,y); }catch(e){ alert('⚠️ '+friendly(e)); } if(document.getElementById('vault-ov').style.display==='block') renderPdfVault(); return; }
+  if(a==='del'){ const r=await getVaultPdf(x); if(r&&confirm('¿Seguro que deseas eliminar “'+r.name+'” de la bóveda?')){await deleteVaultPdf(x);toast('🗑 PDF eliminado');} }
+  if(a==='add'){ const i=document.createElement('input'); i.type='file'; i.accept='application/pdf,.pdf'; i.onchange=async()=>{ try{ await uploadVaultPdf(i.files[0]); toast('✅ PDF guardado'); }catch(e){ alert('⚠️ '+friendly(e)); } renderPdfVault(); }; i.click(); return; }
+  renderPdfVault(); }catch(e){ alert('⚠️ '+friendly(e)); } };
+Object.assign(window,{uploadVaultPdf,deleteVaultPdf,openVaultPdf,downloadVaultPdf,getVaultStats,renderPdfVault,exportPdfVault,restoreEmbeddedPdfVault,validatePdfFile,openPdfVaultDB});
+/* ---- Panel de PDFs dentro de cada actividad ---- */
+let _exUrls=[];
+async function refreshExPanel(){ const box=document.getElementById('vault-ex-panel'); if(!box) return; const exId=state.activeExercise; let st;
+  _exUrls.forEach(u=>URL.revokeObjectURL(u)); _exUrls=[];
+  try{st=await getVaultStats();}catch(e){box.innerHTML='';return;}
+  const ids=(await getAssign())[exId]||[], fs=ids.map(id=>st.files.find(f=>f.id===id)).filter(Boolean);
+  // El estudiante solo ve los PDFs que el docente asignó a esta actividad (sin PDFs: no se muestra nada)
+  box.innerHTML=fs.map(f=>{
+    return `<div class="ex-resource-block"><button type="button" class="ex-resource-btn" onclick="vaultUI('dl','${f.id}')" aria-label="Descargar ${escHtml(f.name)}"><span>📕</span><span>Descargar PDF · ${escHtml(f.name)} (${mb(f.size)})</span></button></div>`;}).join(''); }
+/* ---- Panel del Docente: elegir PDFs por actividad y descargar el HTML para distribuir ---- */
+async function renderTeacherVault(){ const card=document.getElementById('vault-teacher-card'), body=document.getElementById('vault-teacher-body'); if(!card||!body) return;
+  if(!canDistribute()){ card.style.display='none'; return; } card.style.display='';
+  let st; try{st=await getVaultStats();}catch(e){ body.innerHTML='<p>⚠️ '+escHtml(friendly(e))+'</p>'; return; }
+  const assign=await getAssign(), nAsig=new Set([].concat(...Object.values(assign))).size;
+  body.innerHTML=`<p style="font-size:12px;color:var(--txt2);margin:0 0 10px">Marca hasta 2 PDFs por actividad. El HTML que descargues incluirá <b>solo los PDFs marcados</b> (${nAsig} de ${st.count} en la biblioteca) y la trazabilidad registrada hasta ahora.</p>`+
+   (st.count?'':'<div class="v-f" style="color:var(--txt2)">No hay PDFs en la biblioteca. El administrador debe cargarlos y entregarte el HTML.</div>')+
+   `<div class="v-grid">`+EXERCISES.map(ex=>{const ids=assign[ex.id]||[];
+     return `<div class="v-card"><b>${ex.icon} ${escHtml(ex.title)}</b><div style="font-size:12px;color:var(--txt2)">${ids.length} / 2 PDFs asignados</div>`+
+      st.files.map(f=>`<label class="v-f" style="display:block;cursor:pointer"><input type="checkbox" ${ids.includes(f.id)?'checked':''} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)} <span style="color:var(--txt2)">(${mb(f.size)})</span></label>`).join('')+`</div>`;}).join('')+`</div>
+   <button class="v-add" style="width:auto;margin-top:14px" onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>`; }
+const _bt=window.buildTeacher; if(typeof _bt==='function') window.buildTeacher=function(){ const r=_bt.apply(this,arguments); renderTeacherVault(); return r; };
+const _se=window.startExercise;
+window.startExercise=function(exId){ const r=_se.apply(this,arguments); audit('ejercicio_iniciado',exId,'','Abrió la actividad desde el tablero'); const det=document.getElementById('exercise-detail');
+  if(det&&det.children.length){ const box=document.createElement('div'); box.id='vault-ex-panel'; const cl=det.querySelector('.ex-close-card'); (cl&&cl.parentNode===det)?cl.before(box):det.append(box); refreshExPanel(); } return r; };
+const _vu=window.vaultUI; window.vaultUI=async function(){ await _vu.apply(this,arguments); setTimeout(()=>{ refreshExPanel(); renderTeacherVault(); },300); };
+restoreEmbeddedPdfVault().then(migrateAssign).catch(e=>{console.error(e);audit('pdf_sync_failed','','restauración');});
+})();
+</script>
 </body>
 
 </html>
