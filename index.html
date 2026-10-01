@@ -3508,43 +3508,7 @@
           <div class="srv-stat"><span class="sv" id="sv-j">0</span><span class="sl">JSONs</span></div>
         </div>
 
-        <!-- GUÍAS PARA ESTUDIANTES (materiales por actividad) -->
-        <div class="srv-sec">
-          <div class="mat-card">
-            <div class="mat-card-icon">📚</div>
-            <div>
-              <h3>Guías para estudiantes</h3>
-              <p>Sube guías (PDF, imágenes, Word). Se guardan <strong>dentro de este index</strong> (no en el navegador). Luego descarga el index con las guías incrustadas.</p>
-            </div>
-          </div>
-
-          <div class="mat-grid">
-            <div>
-              <div class="mat-modules-label">Selecciona el módulo</div>
-              <div class="mat-module-list" id="mat-module-list"></div>
-            </div>
-
-            <div class="mat-selected-panel">
-              <div class="mat-selected-title" id="mat-selected-title">Módulo seleccionado</div>
-              <label class="mat-drop" id="mat-drop">
-                <span class="mat-drop-icon">📎</span>
-                <span class="mat-drop-title">Toca para subir un recurso al módulo seleccionado</span>
-                <span class="mat-drop-hint">PDF · Imágenes · Word · Máx. 2MB · hasta 2 por módulo</span>
-                <input type="file" id="mat-file-input" accept=".pdf,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*" style="display:none">
-              </label>
-              <div id="mat-current-wrap"></div>
-            </div>
-          </div>
-
-          <button type="button" class="srv-import-btn-main" style="margin-top:14px;width:100%;max-width:100%" onclick="downloadEmbeddedIndex()">
-            <span style="font-size:1.6rem">💾</span>
-            <span>Descargar index con PDFs incrustados</span>
-          </button>
-          <p style="font-size:11px;color:#8b949e;margin-top:10px">
-            Sube las guías y pulsa el botón. El archivo <strong>index.html</strong> descargado ya lleva los PDFs dentro;
-            súbelo al servidor o compártelo al grupo (online y offline).
-          </p>
-        </div>
+        <!-- Las guías PDF las carga solo el administrador en la Bóveda (vista normal, perfil Admin); aquí ya no se suben. -->
 
         <!-- TABLA ESTUDIANTES -->
         <div class="srv-sec">
@@ -7513,11 +7477,6 @@ EMOCIONES REGISTRADAS:
       a.click();
       URL.revokeObjectURL(a.href);
       toast(toastMsg);
-    }
-
-    /** Docente: descarga index.html con guías/PDFs ya incrustados para publicar o compartir. */
-    function downloadEmbeddedIndex() {
-      exportIndexHtmlFile('index.html', '💾 Index descargado con PDFs incrustados');
     }
 
     /** Convierte un texto en un fragmento seguro para nombre de archivo (sin caracteres inválidos, espacios → guion bajo). */
