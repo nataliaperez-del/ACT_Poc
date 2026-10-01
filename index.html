@@ -4008,6 +4008,21 @@
             <div id="local-load-st"></div>
           </div>
 
+          <!-- JSON DEL GRUPO (solo Docente): lo compila y lo entrega al administrador bajo su responsabilidad -->
+          <div class="card" id="group-export-card" style="display:none">
+            <h3 class="section-title">📦 JSON del grupo para el administrador</h3>
+            <p style="font-size:13px;color:var(--txt2);margin-bottom:10px;line-height:1.5">
+              Cuando hayas importado los JSON de <strong>todos</strong> los estudiantes que atiendes, genera aquí un único archivo
+              con su avance y la trazabilidad completa. <strong>Entregarlo al administrador es tu responsabilidad</strong>.
+            </p>
+            <div id="group-export-summary" style="font-size:13px;font-weight:700;color:var(--azul);margin-bottom:10px"></div>
+            <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--txt2);margin-bottom:12px;cursor:pointer;line-height:1.4">
+              <input type="checkbox" id="group-export-noimg" style="margin-top:2px">
+              <span>Excluir las imágenes de las actividades (archivo más liviano)</span>
+            </label>
+            <button type="button" class="btn btn-primary" id="group-export-btn" onclick="exportGroupJson()">📦 Exportar JSON del grupo</button>
+          </div>
+
           <!-- GUÍAS PARA ESTUDIANTES (materiales por módulo ACT) -->
           <div class="card">
             <div class="matl-card">
@@ -4615,6 +4630,7 @@
       ejercicio_completado: '✅ Completó una actividad',
       json_exportado: '📤 Exportó su JSON de progreso',
       json_importado: '📥 Importó JSON de estudiantes',
+      json_grupo_exportado: '📦 Generó el JSON del grupo para el administrador',
       trazabilidad_importada: '📥 Recibió trazabilidad de otros perfiles'
     };
     /** @returns {string} texto legible de una acción de auditoría */
@@ -6999,6 +7015,7 @@ EMOCIONES REGISTRADAS:
 
       renderDocsPanel(); // Guías para estudiantes (materiales por módulo)
       renderAuditPanel(isAdmin); // Trazabilidad (solo Administrador)
+      renderGroupExport(!isAdmin); // JSON del grupo (solo Docente)
     }
 
     /**
@@ -7558,6 +7575,54 @@ EMOCIONES REGISTRADAS:
       const blob = new Blob([JSON.stringify(exp, null, 2)], { type: 'application/json' }); const a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = fileName;
       a.click(); URL.revokeObjectURL(a.href); toast('📤 JSON exportado: ' + fileName)
+    }
+
+    /** Estudiantes (rol 'estudiante') que el docente tiene importados en este dispositivo. */
+    function groupStudents() {
+      return (getUsers().usuarios || []).filter(u => u.rol === 'estudiante');
+    }
+
+    /** Muestra/oculta la tarjeta "JSON del grupo" (solo docente) y actualiza su resumen y estado del botón. */
+    function renderGroupExport(show) {
+      const card = document.getElementById('group-export-card'); if (!card) return;
+      card.style.display = show ? '' : 'none'; if (!show) return;
+      const n = groupStudents().length, ev = getAudit().length;
+      const sum = document.getElementById('group-export-summary');
+      if (sum) sum.textContent = n ? (n + ' estudiante(s) importado(s) · ' + ev + ' evento(s) de trazabilidad') : 'Aún no has importado JSON de estudiantes.';
+      const btn = document.getElementById('group-export-btn'); if (btn) btn.disabled = !n;
+    }
+
+    /**
+     * Docente: compila en un solo .json a todos los estudiantes importados (con su nombre y cédula)
+     * más la trazabilidad completa, para entregarlo al administrador. Pide confirmar la
+     * responsabilidad de la entrega y deja el registro en la trazabilidad.
+     * Efecto: dispara una descarga, registra un evento, muestra un toast.
+     */
+    function exportGroupJson() {
+      const est = groupStudents();
+      if (!est.length) { toast('⚠️ Primero importa los JSON de tus estudiantes'); return; }
+      const cfg = getConfig(), docente = staffActorName('profesor');
+      const sinImg = !!document.getElementById('group-export-noimg')?.checked;
+      if (!confirm('Vas a generar el JSON de tu grupo con ' + est.length + ' estudiante(s).\n\n' +
+        'Al entregarlo al administrador te haces responsable de que esté completo y de que llegue a sus manos.\n\n¿Confirmas?')) return;
+      const fecha = new Date().toISOString();
+      const fileName = 'ACTivaArte_Grupo_' + fileSafe(docente) + '_' + fecha.slice(0, 10) + '.json';
+      logAuditEvent('json_grupo_exportado', '', fileName, docente, 'profesor',
+        'Botón "Exportar JSON del grupo": ' + est.length + ' estudiante(s)' + (sinImg ? ', sin imágenes' : '') + ' — entrega al administrador bajo su responsabilidad');
+      const trazabilidad = getAudit();
+      const exp = {
+        tipo: 'grupo', version: APP_VER, fecha_exportacion: fecha,
+        exportado_por: { nombre: docente, rol: 'profesor', grupo: cfg.grupoNombre || '' },
+        responsable_entrega: docente,
+        resumen: { estudiantes: est.length, eventos: trazabilidad.length, sin_imagenes: sinImg },
+        usuarios: est, trazabilidad
+      };
+      const json = JSON.stringify(exp, sinImg ? (k, v) => (k === 'imagenBase64' ? null : v) : null, 2);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = fileName;
+      a.click(); URL.revokeObjectURL(a.href);
+      toast('📦 JSON del grupo exportado: ' + fileName);
+      renderGroupExport(true);
     }
 
     /** Pide por prompt() la URL del servidor GAS y la guarda en localStorage. Efecto: localStorage, refresca UI de sync, toast. */
