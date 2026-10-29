@@ -3974,7 +3974,9 @@
 
           <!-- JSON DEL GRUPO (solo Docente): lo compila y lo entrega al administrador bajo su responsabilidad -->
           <div class="card" id="group-export-card" style="display:none">
-            <h3 class="section-title">📦 JSON del grupo para el administrador</h3>
+            <h3 class="section-title">📤 Entrega formal al administrador</h3>
+            <div id="entrega-steps" style="font-size:13px;line-height:1.8;margin-bottom:12px"></div>
+            <h4 style="margin:4px 0 6px;font-size:14px">📦 JSON del grupo</h4>
             <p style="font-size:13px;color:var(--txt2);margin-bottom:10px;line-height:1.5">
               Cuando hayas importado los JSON de <strong>todos</strong> los estudiantes que atiendes, genera aquí un único archivo
               con su avance y la trazabilidad completa. <strong>Entregarlo al administrador es tu responsabilidad</strong>.
@@ -3985,6 +3987,10 @@
               <span>Excluir las imágenes de las actividades (archivo más liviano)</span>
             </label>
             <button type="button" class="btn btn-primary" id="group-export-btn" onclick="exportGroupJson()">📦 Exportar JSON del grupo</button>
+            <button type="button" class="btn btn-primary" id="entrega-open-btn" style="margin-top:10px" onclick="abrirFormularioEntrega()" disabled>📤 Abrir formulario de entrega</button>
+            <div style="font-size:11px;color:var(--txt2);margin-top:6px">Se habilita al generar el informe PDF y el JSON del grupo. Cada entrega queda como una versión con fecha y hora.</div>
+            <hr style="border:0;border-top:1px solid var(--borde);margin:14px 0">
+            <button type="button" class="btn btn-ghost btn-sm" style="width:auto" onclick="abrirFormularioPdfs()">🎨 Enviar PDFs diseñados (formulario por módulo)</button>
           </div>
 
           <!-- Las guías PDF ya no las sube el docente: el administrador las carga en la Bóveda (por solicitud del formulario) y el docente solo marca cuáles ve el estudiante en cada actividad. -->
@@ -4150,6 +4156,9 @@
     const LEGACY_DOCS_KEY = 'activa_docs_v1'; // solo migración única desde versiones antiguas; ya no se escribe
     const MAX_DOC_MB = 2; // límite duro: el recurso se guarda en base64 dentro del index
     const MAX_DOCS_PER_EX = 2; // máximo de recursos (PDF/imagen/Word) por actividad
+    // Formularios de Google (cuenta mg.elizabethp@gmail.com). Cambiar aquí si se vuelven a crear.
+    const FORM_PDFS_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfcJkWHoPFBo9cy-T3RJW4wtp9t24DyavXR_-6HZYsYpBzoag/viewform';
+    const FORM_ENTREGA_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdNx79BOcz6AZnWPt4swzk8J61NhgHA3vC-BbNnlbHPw485Qg/viewform';
     const DEFAULT_PIN_DOCENTE = 'UNADDOCENTE2026'; // PIN por defecto para el rol docente (se puede cambiar desde configuración)
     const DEFAULT_PIN_ADMIN = 'ADMIN2027'; // PIN por defecto para el rol administrador
 
@@ -4560,6 +4569,8 @@
       ejercicio_completado: '✅ Completó una actividad',
       json_exportado: '📤 Exportó su JSON de progreso',
       json_importado: '📥 Importó JSON de estudiantes',
+      entrega_formulario: '📤 Abrió el formulario de entrega formal al administrador',
+      pdfs_formulario: '🎨 Abrió el formulario para enviar PDFs diseñados',
       compromiso_docente: '🤝 Aceptó el compromiso de distribución y entrega del JSON',
       json_grupo_exportado: '📦 Generó el JSON del grupo para el administrador',
       trazabilidad_importada: '📥 Recibió trazabilidad de otros perfiles'
@@ -7191,12 +7202,14 @@ EMOCIONES REGISTRADAS:
     document.getElementById('export-teacher-html')?.addEventListener('click', () => {
       printHtmlAsPdf(buildFullReportHtml(getUsers(), getConfig()));
       toast('🖨️ Abriendo diálogo de impresión — elige "Guardar como PDF"');
+      if (state.mode === 'profesor') marcarEntrega('informePdf');
     });
 
     // "📊 Excel" (barra superior del Panel Docente) — genera un .xlsx real
     document.getElementById('export-teacher-excel').addEventListener('click', () => {
       downloadXlsx(teacherReportRows(getUsers()), 'ACTiva_Arte_Reporte_' + new Date().toISOString().slice(0, 10) + '.xlsx', 'Reporte');
       toast('📊 Reporte Excel exportado');
+      if (state.mode === 'profesor') marcarEntrega('informeExcel');
     });
 
     // Botón "Cambiar PIN" del panel docente: pide por prompt() el rol y el nuevo PIN
@@ -7508,6 +7521,29 @@ EMOCIONES REGISTRADAS:
       return (getUsers().usuarios || []).filter(u => u.rol === 'estudiante');
     }
 
+    const ENTREGA_KEY = 'activa_entrega_v1';
+    /** Pasos de la entrega formal ya cumplidos en esta versión: {informePdf, informeExcel, jsonGrupo} (fecha ISO). */
+    function getEntrega() { try { return JSON.parse(localStorage.getItem(ENTREGA_KEY) || '{}'); } catch { return {}; } }
+    function marcarEntrega(paso) {
+      const e = getEntrega(); e[paso] = new Date().toISOString();
+      try { localStorage.setItem(ENTREGA_KEY, JSON.stringify(e)); } catch { }
+      renderGroupExport(state.mode === 'profesor');
+    }
+    /** Abre el formulario de entrega formal (solo con informe PDF y JSON del grupo generados) y reinicia la lista para la próxima versión. */
+    function abrirFormularioEntrega() {
+      const e = getEntrega();
+      if (!e.informePdf || !e.jsonGrupo) { toast('⚠️ Genera primero el informe PDF y el JSON del grupo'); return; }
+      logAuditEvent('entrega_formulario', '', 'Formulario de entrega', staffActorName('profesor'), 'profesor',
+        'Informe PDF: ' + e.informePdf + ' · Excel: ' + (e.informeExcel || 'no') + ' · JSON del grupo: ' + e.jsonGrupo);
+      window.open(FORM_ENTREGA_URL, '_blank', 'noopener');
+      try { localStorage.removeItem(ENTREGA_KEY); } catch { }
+      renderGroupExport(true);
+    }
+    function abrirFormularioPdfs() {
+      logAuditEvent('pdfs_formulario', '', 'Formulario de PDFs', staffActorName(state.mode || 'profesor'), state.mode || 'profesor', 'Abrió el formulario para enviar PDFs diseñados');
+      window.open(FORM_PDFS_URL, '_blank', 'noopener');
+    }
+
     /** Muestra/oculta la tarjeta "JSON del grupo" (solo docente) y actualiza su resumen y estado del botón. */
     function renderGroupExport(show) {
       const card = document.getElementById('group-export-card'); if (!card) return;
@@ -7516,6 +7552,10 @@ EMOCIONES REGISTRADAS:
       const sum = document.getElementById('group-export-summary');
       if (sum) sum.textContent = n ? (n + ' estudiante(s) importado(s) · ' + ev + ' evento(s) de trazabilidad') : 'Aún no has importado JSON de estudiantes.';
       const btn = document.getElementById('group-export-btn'); if (btn) btn.disabled = !n;
+      const e = getEntrega(), paso = (k, txt, opt) => '<div>' + (e[k] ? '✅' : '⬜') + ' ' + txt + (opt ? ' <span style="color:var(--txt2)">(opcional)</span>' : '') + (e[k] ? ' <span style="color:var(--txt2);font-size:11px">· ' + new Date(e[k]).toLocaleString('es-CO') + '</span>' : '') + '</div>';
+      const st = document.getElementById('entrega-steps');
+      if (st) st.innerHTML = paso('informePdf', 'Informe PDF generado (botón Reporte PDF)') + paso('informeExcel', 'Informe Excel generado (botón Excel)', true) + paso('jsonGrupo', 'JSON del grupo exportado') + '<div>' + (e.informePdf && e.jsonGrupo ? '➡️ Listo para entregar en el formulario' : '⬜ Entrega en el formulario') + '</div>';
+      const ob = document.getElementById('entrega-open-btn'); if (ob) ob.disabled = !(e.informePdf && e.jsonGrupo);
     }
 
     /**
@@ -7548,7 +7588,7 @@ EMOCIONES REGISTRADAS:
       a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = fileName;
       a.click(); URL.revokeObjectURL(a.href);
       toast('📦 JSON del grupo exportado: ' + fileName);
-      renderGroupExport(true);
+      marcarEntrega('jsonGrupo');
     }
 
     /** Pide por prompt() la URL del servidor GAS y la guarda en localStorage. Efecto: localStorage, refresca UI de sync, toast. */
