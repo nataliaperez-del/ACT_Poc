@@ -1718,18 +1718,11 @@
       gap: 4px
     }
 
-    /* Badge proceso ACT */
-    .ex-process-badge {
-      display: inline-block;
-      background: rgba(242, 169, 0, .28);
-      color: var(--amarillo);
-      border-radius: var(--rp);
-      padding: 3px 10px;
+    /* Cita de la actividad: sutil (pequeña, cursiva y con baja opacidad) */
+    .ex-header-meta .ex-cita {
       font-size: 11px;
-      font-weight: 800;
-      border: 1px solid rgba(242, 169, 0, .35);
-      margin-top: 10px;
-      letter-spacing: .3px;
+      font-style: italic;
+      opacity: .6
     }
 
     /* Barra de progreso del ejercicio */
@@ -5795,9 +5788,8 @@
         <div class="ex-header-title">${ex.actividad || ex.title}</div>
         <div class="ex-header-meta">
           <span>⏱ ${ex.tiempo}</span>
-          <span>📖 ${ex.process}</span>
+          <span class="ex-cita">📖 ${ex.process}</span>
         </div>
-        <span class="ex-process-badge">${ex.process}</span>
         <div class="ex-progress-wrap"><div class="ex-progress-fill" id="ex-prog-fill"></div></div>
       </div>
     </div>`;
