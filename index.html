@@ -3900,21 +3900,11 @@
         <div class="form-card" style="border-radius:0 0 var(--r) var(--r)">
           <button class="btn btn-ghost btn-sm" style="width:auto;padding:8px 16px;margin-bottom:18px"
             onclick="showScreen('screen-dashboard')">← Volver</button>
-          <div class="form-group"><label class="form-label" for="mod-titulo">Título de tu reflexión <span
-                class="req">*</span></label><input type="text" id="mod-titulo" class="form-input"
-              placeholder="Un título breve…" maxlength="80">
-            <div class="char-counter" id="cnt-titulo">0 / 80</div>
-          </div>
           <div class="form-group"><label class="form-label" for="mod-texto">Tu reflexión <span
                 class="req">*</span><br><span class="opt">(mínimo 50 caracteres)</span></label><textarea id="mod-texto"
               class="form-input long" placeholder="Escribe libremente lo que sientes, piensas o quieres expresar…"
               minlength="50" maxlength="2000"></textarea>
             <div class="char-counter" id="cnt-texto">0 / 2000 (mín. 50)</div>
-          </div>
-          <div class="form-group"><label class="form-label" for="mod-ampliacion">¿Quieres ampliar? <span
-                class="opt">(opcional)</span></label><textarea id="mod-ampliacion" class="form-input xl"
-              placeholder="Agrega más detalles…" maxlength="5000"></textarea>
-            <div class="char-counter" id="cnt-ampliacion">0 / 5000</div>
           </div>
           <div class="form-group"><label class="form-label">Adjuntar imagen <span class="opt">(opcional)</span></label>
             <div class="upload-area" onclick="document.getElementById('mod-imagen').click()">
@@ -6412,9 +6402,7 @@
      */
     function setupModuleScreen() {
       // Configurar contadores
-      setupCharCounter('mod-titulo', 'cnt-titulo', 0);
       setupCharCounter('mod-texto', 'cnt-texto', 50);
-      setupCharCounter('mod-ampliacion', 'cnt-ampliacion', 0);
 
       // Preview imagen — usar .onchange para evitar acumulación de listeners duplicados
       const imgInput = document.getElementById('mod-imagen');
@@ -6435,12 +6423,12 @@
     // imagen opcional, guarda el módulo en la sesión del día, otorga puntos (con bonos por
     // imagen/extensión), revisa logros y limpia el formulario para una nueva reflexión.
     document.getElementById('save-module').addEventListener('click', () => {
-      const titulo = document.getElementById('mod-titulo').value.trim();
       const texto = document.getElementById('mod-texto').value.trim();
-      const ampliacion = document.getElementById('mod-ampliacion').value.trim();
+      // Un solo espacio de texto: el título se genera con la fecha (el historial y los reportes siguen mostrándolo)
+      const titulo = 'Reflexión del ' + new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+      const ampliacion = '';
       const animo = document.getElementById('mod-animo').value;
 
-      if (!titulo) { openModal('Título requerido', 'Por favor escribe un título para tu reflexión.'); return; }
       if (texto.length < 50) { openModal('Reflexión muy corta', 'Tu reflexión debe tener al menos 50 caracteres. ¡Exprésate!'); return; }
       if (!animo) { openModal('¿Cómo te sientes?', 'Selecciona tu estado de ánimo al finalizar.'); return; }
 
@@ -6479,15 +6467,13 @@
         loadModuleHistory();
 
         // Limpiar form
-        document.getElementById('mod-titulo').value = '';
         document.getElementById('mod-texto').value = '';
-        document.getElementById('mod-ampliacion').value = '';
         document.getElementById('mod-animo').value = '';
         document.getElementById('mod-preview').style.display = 'none';
         document.getElementById('mod-download-badge').style.display = 'none';
-        ['cnt-titulo', 'cnt-texto', 'cnt-ampliacion'].forEach(id => {
+        ['cnt-texto'].forEach(id => {
           const el = document.getElementById(id); if (el) el.textContent = '0 / ' + ({
-            'cnt-titulo': '80', 'cnt-texto': '2000 (mín. 50)', 'cnt-ampliacion': '5000'
+            'cnt-texto': '2000 (mín. 50)'
           }[id]);
         });
       });
