@@ -3659,7 +3659,7 @@
               guardan primero en tu dispositivo. Si tu docente activa la sincronización en línea, estos datos también
               se envían a un servidor institucional para que tu docente pueda ver tus estadísticas. El archivo JSON que
               entregues a tu docente o al administrador incluye tu nombre y cédula reales (los que registras abajo) y
-              el registro de tus acciones en la aplicación, para poder hacer trazabilidad del uso del sistema.
+              el registro de tus acciones en la aplicación, para poder hacer trazabilidad del uso del sistema. De forma voluntaria también puedes reportar tu pertenencia a un grupo con enfoque diferencial y el código RUV o documento que lo identifica: es un dato sensible que solo se usa para sustentar el enfoque diferencial del producto.
               Esta es una prueba de concepto: aún no cuenta con cifrado ni con un mecanismo formal para ejercer tus
               derechos de Habeas Data (Ley 1581 de 2012).</p>
             <p style="margin-top:8px"><strong>3. Alertas:</strong> Si el sistema detecta patrones de riesgo repetidos
@@ -3691,7 +3691,37 @@
             </div>
           </div>
 
-          <div class="form-group">
+                    <div class="form-group" id="consent-enfoque-block">
+            <label style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--txt2);cursor:pointer;line-height:1.5">
+              <input type="checkbox" id="consent-enfoque-check"
+                style="width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--azul)">
+              <span><strong>Enfoque diferencial (opcional).</strong> Marco esta casilla si pertenezco a un grupo con enfoque diferencial y deseo reportarlo.</span>
+            </label>
+            <div id="consent-enfoque-fields" style="display:none;margin-top:12px">
+              <label class="form-label" for="consent-enfoque-tipo">¿A cuál grupo perteneces? <span class="req">*</span></label>
+              <select id="consent-enfoque-tipo" class="form-input">
+                <option value="">-- Selecciona --</option>
+                <option value="indigena">Pueblo indígena</option>
+                <option value="negra-afro-raizal-palenquera">Comunidad negra, afrocolombiana, raizal, palenquera o afrodescendiente</option>
+                <option value="rom">Pueblo ROM</option>
+                <option value="mujer">Mujer</option>
+                <option value="lgtbi">Población LGTBI</option>
+                <option value="discapacidad">Persona en condición de discapacidad</option>
+                <option value="victima">Víctima del conflicto armado</option>
+                <option value="rural">Población rural</option>
+                <option value="otro">Otro</option>
+              </select>
+              <label class="form-label" for="consent-enfoque-id" style="margin-top:10px">Código RUV o documento que lo identifique <span class="req">*</span></label>
+              <input type="text" id="consent-enfoque-id" class="form-input" maxlength="60" autocomplete="off"
+                placeholder="Ej.: código RUV, certificado o documento que acredite el grupo">
+              <div class="form-hint" id="consent-enfoque-err" style="display:none;color:#E53E3E;font-style:normal">
+                Selecciona el grupo y escribe el código RUV o el documento que lo identifica.
+              </div>
+              <div class="form-hint">Es un dato sensible y voluntario. Se usa solo para sustentar el enfoque diferencial del producto.</div>
+            </div>
+          </div>
+
+<div class="form-group">
             <label
               style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--txt2);cursor:pointer;line-height:1.5">
               <input type="checkbox" id="consent-checkbox"
@@ -5436,6 +5466,16 @@
           valid = false;
         } else if (checkboxErr) checkboxErr.style.display = 'none';
 
+        // Enfoque diferencial (opcional): si se marca, se exige el grupo y su identificación (código RUV o documento)
+        const enfCheck = document.getElementById('consent-enfoque-check');
+        const enfTipo = (document.getElementById('consent-enfoque-tipo')?.value || '').trim();
+        const enfId = (document.getElementById('consent-enfoque-id')?.value || '').trim();
+        const enfErr = document.getElementById('consent-enfoque-err');
+        if (enfCheck?.checked && (!enfTipo || !enfId)) {
+          if (enfErr) enfErr.style.display = 'block';
+          valid = false;
+        } else if (enfErr) enfErr.style.display = 'none';
+
         if (!valid) {
           if (!name) input?.focus();
           else if (!cedula) cedulaInput?.focus();
@@ -5447,10 +5487,19 @@
         user.consent = true;
         user.cedula = cedula;
         user.consentDate = new Date().toISOString();
+        if (enfCheck?.checked) {
+          user.enfoqueDiferencial = { aplica: true, tipo: enfTipo, identificacion: enfId, fechaReporte: new Date().toISOString() };
+        } else if (!user.enfoqueDiferencial) {
+          user.enfoqueDiferencial = { aplica: false, fechaReporte: new Date().toISOString() };
+        }
         saveUser(user);
         state.mode = selectedRole; saveState();
-        logAuditEvent('ingreso', '', '', user.nombre, 'estudiante', 'Aceptó el consentimiento e ingresó');
+        logAuditEvent('ingreso', '', '', user.nombre, 'estudiante', 'Aceptó el consentimiento e ingresó' + (enfCheck?.checked ? ' · Reportó enfoque diferencial: ' + enfTipo : ''));
         buildCheckin(); showScreen('screen-checkin');
+      });
+
+      document.getElementById('consent-enfoque-check')?.addEventListener('change', (e) => {
+        const f = document.getElementById('consent-enfoque-fields'); if (f) f.style.display = e.target.checked ? 'block' : 'none';
       });
 
       // Enter en los campos de nombre/cédula = aceptar (evita depender solo del click)
