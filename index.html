@@ -7615,10 +7615,10 @@ EMOCIONES REGISTRADAS:
     }
 
     const COMP_KEY = 'activa_compromiso_v1';
-    /** Compromiso del docente: {descarga, aceptado, archivo}. Se reinicia con cada descarga de la versión offline. */
+    /** Compromiso del docente: {aceptado, descarga, archivo}. Hay que marcarlo antes de CADA descarga de la versión offline. */
     function getCompromiso() { try { return JSON.parse(localStorage.getItem(COMP_KEY) || '{}'); } catch { return {}; } }
     function setCompromiso(o) { try { localStorage.setItem(COMP_KEY, JSON.stringify(o)); } catch { } }
-    function compromisoOk() { const c = getCompromiso(); return !!(c.aceptado && c.descarga && c.aceptado >= c.descarga); }
+    function compromisoOk() { const c = getCompromiso(); return !!(c.aceptado && c.descarga && c.descarga >= c.aceptado); }
     const ENTREGA_KEY = 'activa_entrega_v1';
     /** Pasos de la entrega formal ya cumplidos en esta versión: {informePdf, informeExcel, jsonGrupo} (fecha ISO). */
     function getEntrega() { try { return JSON.parse(localStorage.getItem(ENTREGA_KEY) || '{}'); } catch { return {}; } }
@@ -7631,7 +7631,7 @@ EMOCIONES REGISTRADAS:
     function abrirFormularioEntrega() {
       const e = getEntrega();
       if (!e.informePdf || !e.jsonGrupo) { toast('⚠️ Genera primero el informe PDF y el JSON del grupo'); return; }
-      if (!compromisoOk()) { toast('⚠️ Acepta primero el compromiso del docente (Proceso 1 · Alistamiento, tras descargar la versión offline)'); return; }
+      if (!compromisoOk()) { toast('⚠️ Acepta primero el compromiso del docente (Proceso 1 · Alistamiento, antes de descargar la versión offline)'); return; }
       logAuditEvent('entrega_formulario', '', 'Formulario de entrega', staffActorName('profesor'), 'profesor',
         'Informe PDF: ' + e.informePdf + ' · Excel: ' + (e.informeExcel || 'no') + ' · JSON del grupo: ' + e.jsonGrupo);
       window.open(FORM_ENTREGA_URL, '_blank', 'noopener');
@@ -7653,7 +7653,7 @@ EMOCIONES REGISTRADAS:
       const btn = document.getElementById('group-export-btn'); if (btn) btn.disabled = !n;
       const e = getEntrega(), paso = (k, txt, opt) => '<div>' + (e[k] ? '✅' : '⬜') + ' ' + txt + (opt ? ' <span style="color:var(--txt2)">(opcional)</span>' : '') + (e[k] ? ' <span style="color:var(--txt2);font-size:11px">· ' + new Date(e[k]).toLocaleString('es-CO') + '</span>' : '') + '</div>';
       const st = document.getElementById('entrega-steps');
-      if (st) st.innerHTML = '<div>' + (compromisoOk() ? '✅' : '⬜') + ' Compromiso del docente aceptado <span style="color:var(--txt2);font-size:11px">(Proceso 1, tras descargar la versión offline)</span></div>' + paso('informePdf', 'Informe PDF generado (botón Reporte PDF)') + paso('informeExcel', 'Informe Excel generado (botón Excel)', true) + paso('jsonGrupo', 'JSON del grupo exportado') + '<div>' + (e.informePdf && e.jsonGrupo ? '➡️ Listo para entregar en el formulario' : '⬜ Entrega en el formulario') + '</div>';
+      if (st) st.innerHTML = '<div>' + (compromisoOk() ? '✅' : '⬜') + ' Compromiso del docente aceptado <span style="color:var(--txt2);font-size:11px">(Proceso 1, marcado para descargar la versión offline)</span></div>' + paso('informePdf', 'Informe PDF generado (botón Reporte PDF)') + paso('informeExcel', 'Informe Excel generado (botón Excel)', true) + paso('jsonGrupo', 'JSON del grupo exportado') + '<div>' + (e.informePdf && e.jsonGrupo ? '➡️ Listo para entregar en el formulario' : '⬜ Entrega en el formulario') + '</div>';
       const ob = document.getElementById('entrega-open-btn'); if (ob) ob.disabled = !(e.informePdf && e.jsonGrupo && compromisoOk());
     }
 
@@ -8065,18 +8065,20 @@ async function buildSnapshot(){
 function downloadSnapshot(html,fn){ const u=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})), a=document.createElement('a'); a.href=u; a.download=fn; a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); }
 /* exportación: mismo flujo de siempre, ahora con instantánea limpia */
 const COMPROMISO_TXT='Me comprometo a hacer llegar la versión offline a los usuarios finales (los estudiantes), a regresar el archivo JSON consolidado y a registrarlo en el formulario de entrega para el administrador.';
-window.vaultCommit=ck=>{ if(!ck) return; const c=getCompromiso(); setCompromiso({descarga:c.descarga||new Date().toISOString(),aceptado:new Date().toISOString(),archivo:c.archivo||''}); audit('compromiso_docente','',c.archivo||'index.html',COMPROMISO_TXT); renderTeacherVault(); try{ renderGroupExport(true); }catch(e){} };
-function compBox(){ if(rol()!=='profesor') return ''; const c=getCompromiso(), ok=compromisoOk();
-  if(!c.descarga) return '<div class="v-f" style="margin-top:14px;border:1px dashed var(--borde);border-radius:var(--rs);padding:12px;opacity:.7"><label style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;font-size:13px"><input type="checkbox" disabled style="width:18px;height:18px;flex-shrink:0;margin-top:2px"><span><b>Paso 4 · Compromiso del docente</b> <span style="color:#c0392b">(obligatorio)</span>. '+COMPROMISO_TXT+'<br><i>Se habilita después de descargar la versión offline.</i></span></label></div>';
-  if(ok) return '<div class="v-f" style="margin-top:14px;border:1px solid #2e7d32;border-radius:var(--rs);padding:12px;background:rgba(46,125,50,.08)"><label style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;font-size:13px"><input type="checkbox" checked disabled style="width:18px;height:18px;flex-shrink:0;margin-top:2px"><span><b>✅ Compromiso del docente aceptado</b> el '+new Date(c.aceptado).toLocaleString('es-CO')+'. '+COMPROMISO_TXT+'</span></label></div>';
-  return '<div class="v-f" style="margin-top:14px;border:2px solid var(--amarillo);border-radius:var(--rs);padding:12px;background:rgba(242,169,0,.12)"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;line-height:1.5;font-size:13px"><input type="checkbox" id="vault-commit-ck" required style="width:18px;height:18px;flex-shrink:0;margin-top:2px" onchange="vaultCommit(this.checked)"><span><b>Paso 4 · Compromiso del docente</b> <span style="color:#c0392b">* obligatorio</span>. '+COMPROMISO_TXT+'<br><span style="color:#c0392b;font-size:12px">Ya descargaste la versión offline: márcalo para poder abrir el formulario de entrega de los JSON.</span></span></label></div>'; }
+let _ck=false; // el compromiso se marca antes de CADA descarga
+window.vaultCommit=ck=>{ _ck=!!ck; const b=document.getElementById('vault-dl-btn'); if(b) b.disabled=!_ck; };
+function compBox(){ if(rol()!=='profesor') return ''; const c=getCompromiso();
+  return '<div class="v-f" style="margin-top:14px;border:2px solid var(--amarillo);border-radius:var(--rs);padding:12px;background:rgba(242,169,0,.12)"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;line-height:1.5;font-size:13px"><input type="checkbox" id="vault-commit-ck" required '+(_ck?'checked':'')+' style="width:18px;height:18px;flex-shrink:0;margin-top:2px" onchange="vaultCommit(this.checked)"><span><b>Paso 3 · Compromiso del docente</b> <span style="color:#c0392b">* obligatorio</span>. '+COMPROMISO_TXT+'<br><span style="color:#c0392b;font-size:12px">Márcalo para habilitar la descarga de la versión offline. Debes marcarlo en cada descarga.</span>'+(compromisoOk()?'<br><span style="color:#2e7d32;font-size:12px">✅ Última descarga con compromiso: '+new Date(c.descarga).toLocaleString('es-CO')+'</span>':'')+'</span></label></div>'; }
 window.exportIndexHtmlFile=async function(fn,msg){
+  if(rol()==='profesor'&&!_ck){ toast('⚠️ Marca el compromiso del docente para habilitar la descarga'); return; }
   try{ syncEmbeddedDocs(getDocs()); }catch(e){}
   const st=await getVaultStats().catch(()=>({count:0,used:0}));
   if(st.used>12*1048576&&!confirm('La aplicación contiene varios archivos PDF. La copia HTML puede ser considerablemente más pesada que los originales y la exportación puede tardar unos segundos. ¿Continuar?')) return;
-  try{ audit('pdf_vault_exported','',fn,'Botón "Descargar HTML para distribuir" ('+st.count+' PDFs en la biblioteca)'); // se registra antes para que viaje dentro del archivo
+  try{ const ahora=new Date().toISOString();
+    if(rol()==='profesor') audit('compromiso_docente','',fn,COMPROMISO_TXT);
+    audit('pdf_vault_exported','',fn,'Botón "Descargar HTML para distribuir" ('+st.count+' PDFs en la biblioteca)'); // se registra antes para que viaje dentro del archivo
     downloadSnapshot(await buildSnapshot(),fn); toast(msg);
-    if(rol()==='profesor'){ setCompromiso({descarga:new Date().toISOString(),aceptado:null,archivo:fn}); }
+    if(rol()==='profesor'){ setCompromiso({aceptado:ahora,descarga:new Date().toISOString(),archivo:fn}); _ck=false; }
     renderTeacherVault(); try{ renderGroupExport(rol()==='profesor'); }catch(e){} }catch(e){ toast('⚠️ '+friendly(e)); } };
 /* ---- Guardado automático sobre el mismo archivo HTML (Chrome/Edge, File System Access API) ---- */
 const FS_OK=typeof window.showOpenFilePicker==='function';
@@ -8172,10 +8174,10 @@ async function renderTeacherVault(){ const card=document.getElementById('vault-t
    `<div class="v-grid">`+EXERCISES.map(ex=>{const ids=assign[ex.id]||[];
      return `<div class="v-card"><b>${ex.icon} ${escHtml(ex.title)}</b><div style="font-size:12px;color:var(--txt2)">${ids.length} / 2 PDFs asignados</div>`+
       st.files.map(f=>`<div class="v-f"><label style="display:block;cursor:pointer"><input type="checkbox" ${ids.includes(f.id)?'checked':''} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)} <span style="color:var(--txt2)">(${mb(f.size)})</span></label><button type="button" onclick="vaultUI('open','${f.id}')" aria-label="Ver ${escHtml(f.name)}">👁 Ver</button></div>`).join('')+`</div>`;}).join('')+`</div>
-   <div class="v-f" style="margin-top:14px"><b>Paso 3 · Descarga la versión offline</b></div>
-   <button class="v-add" id="vault-dl-btn" style="width:auto;margin-top:8px" onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>
    ${compBox()}
-   <div style="font-size:11px;color:var(--txt2);margin-top:6px">Tras cada descarga debes marcar de nuevo el compromiso.</div>`; }
+   <div class="v-f" style="margin-top:14px"><b>Paso 4 · Descarga la versión offline</b></div>
+   <button class="v-add" id="vault-dl-btn" style="width:auto;margin-top:8px" ${rol()==='profesor'&&!_ck?'disabled':''} onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>
+   <div style="font-size:11px;color:var(--txt2);margin-top:6px">La descarga solo se habilita al marcar el compromiso; hay que marcarlo en cada descarga.</div>`; }
 const _bt=window.buildTeacher; if(typeof _bt==='function') window.buildTeacher=function(){ const r=_bt.apply(this,arguments); renderTeacherVault(); return r; };
 const _se=window.startExercise;
 window.startExercise=function(exId){ const r=_se.apply(this,arguments); audit('ejercicio_iniciado',exId,'','Abrió la actividad desde el tablero'); const det=document.getElementById('exercise-detail');
