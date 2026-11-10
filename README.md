@@ -14,7 +14,7 @@ Herramienta de mediación tecnológica, basada en Terapia de Aceptación y Compr
 
 El aplicativo es un único archivo, [`index.html`](index.html), sin dependencias de compilación ni servidor. Se puede abrir directamente en un navegador (se recomienda Chrome o Edge) o desplegar como sitio estático. Funciona sin conexión; las tipografías se cargan desde Google Fonts cuando hay conexión.
 
-Perfiles: estudiante (con consentimiento informado), docente y administrador (con PIN).
+Perfiles: estudiante (con consentimiento informado), docente (ingreso con correo institucional @unad.edu.co) y administrador (con PIN). En la versión web los datos pueden respaldarse en Drive mediante [`apps_script/Code.gs`](apps_script/Code.gs); la versión offline guarda solo en el dispositivo.
 
 ## Autoría
 

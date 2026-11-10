@@ -3618,6 +3618,12 @@
             </div>
           </div>
 
+          <div class="form-group" id="role-email-block" style="display:none;margin-top:8px">
+            <label class="form-label" for="role-email-input">Correo institucional del docente</label>
+            <input type="email" id="role-email-input" class="form-input" placeholder="usuario@unad.edu.co" autocomplete="email" maxlength="120">
+            <div class="form-hint">Ingresa con tu correo @unad.edu.co. Quedará registrado en la trazabilidad de tus acciones.</div>
+            <div class="form-hint" id="role-email-err" style="display:none;color:#E53E3E;font-style:normal"></div>
+          </div>
           <div class="form-group" id="role-pin-block" style="display:none;margin-top:8px">
             <label class="form-label" for="role-pin-input" id="role-pin-label">PIN de acceso</label>
             <input type="password" id="role-pin-input" class="form-input" placeholder="••••" maxlength="20"
@@ -3629,7 +3635,7 @@
           <button class="btn btn-primary" id="btn-continue-role" disabled style="margin-top:8px">
             Continuar →
           </button>
-          <p style="text-align:center;font-size:12px;color:var(--txt2);margin-top:14px">
+          <p id="lock-note" style="text-align:center;font-size:12px;color:var(--txt2);margin-top:14px">
             🔒 Tus datos se guardan solo en este dispositivo
           </p>
           <div class="role-admin-wrap">
@@ -3652,27 +3658,19 @@
           <h2 style="font-size:1.3rem;color:var(--azul);margin-bottom:12px;text-align:center">Uso y Privacidad</h2>
           <div
             style="font-size:13px;color:var(--txt2);line-height:1.6;background:var(--fondo);padding:16px;border-radius:var(--rs);margin-bottom:16px;">
-            <p><strong>1. Propósito:</strong> ACTiva Arte es una herramienta psicoeducativa de bienestar basada en
-              Terapia de Aceptación y Compromiso (ACT). No reemplaza la terapia psicológica ni el tratamiento médico.
-            </p>
+            <p><strong>1. Propósito:</strong> ACTiva Arte es una herramienta que busca el bienestar emocional. Se basa en la Terapia de Aceptación y Compromiso (ACT): aprender a hacer espacio a lo que sentimos y actuar según lo que es importante para ti. No reemplaza la atención profesional.</p>
             <p style="margin-top:8px"><strong>2. Privacidad:</strong> Tus datos (check-ins, reflexiones e imágenes) se
               guardan primero en tu dispositivo. Si tu docente activa la sincronización en línea, estos datos también
               se envían a un servidor institucional para que tu docente pueda ver tus estadísticas. El archivo JSON que
               entregues a tu docente o al administrador incluye tu nombre y cédula reales (los que registras abajo) y
-              el registro de tus acciones en la aplicación, para poder hacer trazabilidad del uso del sistema. De forma voluntaria también puedes reportar tu pertenencia a un grupo con enfoque diferencial y el código RUV o documento que lo identifica: es un dato sensible que solo se usa para sustentar el enfoque diferencial del producto.
+              el registro de tus acciones en la aplicación, para poder hacer trazabilidad del uso del sistema. De forma voluntaria también puedes reportar tu pertenencia a un grupo con enfoque diferencial y, solo si aplica y de forma opcional, el código RUV (víctimas) o la certificación de pertenencia (grupos étnicos): es un dato sensible que solo se usa para sustentar el enfoque diferencial del producto.
               Esta es una prueba de concepto: aún no cuenta con cifrado ni con un mecanismo formal para ejercer tus
               derechos de Habeas Data (Ley 1581 de 2012).</p>
             <p style="margin-top:8px"><strong>3. Alertas:</strong> Si el sistema detecta patrones de riesgo repetidos
               en tus respuestas, se lo señalará a tu docente para que pueda ofrecerte acompañamiento preventivo.</p>
           </div>
 
-          <section class="instr-box" aria-labelledby="what-is-act-title" style="margin-bottom:18px">
-            <h3 id="what-is-act-title" style="font-size:1rem;color:var(--azul);margin-bottom:8px">¿Qué es la Terapia de Aceptación y Compromiso (ACT)?</h3>
-            <p style="font-size:13px;line-height:1.6;margin-bottom:8px">ACT es un enfoque psicoterapéutico que promueve la flexibilidad psicológica: aprender a hacer espacio a las experiencias internas y elegir acciones conectadas con lo que es importante para cada persona. ACTiva Arte es una herramienta psicoeducativa y no sustituye la atención profesional.</p>
-            <blockquote style="font-family:'Lora',serif;font-size:13px;line-height:1.6;color:var(--azul);border-left:3px solid var(--salvia);padding-left:12px;margin:8px 0">«…las terapias de tercera generación, entre las que se destaca la terapia de aceptación y compromiso (ACT), emergen como una respuesta a las limitaciones percibidas en paradigmas anteriores…» <span style="font-family:'Nunito',sans-serif;font-style:normal;color:var(--txt2)">— González Romero et al. (2026, p. 3).</span></blockquote>
-          </section>
-
-          <div class="form-group">
+                    <div class="form-group">
             <label class="form-label" for="consent-name-input">Tu nombre completo real <span class="req">*</span> <span
                 class="opt">(el mismo de tu documento)</span></label>
             <input type="text" id="consent-name-input" class="form-input" placeholder="Ej: Laura Martínez Gómez" maxlength="60"
@@ -3701,23 +3699,28 @@
               <label class="form-label" for="consent-enfoque-tipo">¿A cuál grupo perteneces? <span class="req">*</span></label>
               <select id="consent-enfoque-tipo" class="form-input">
                 <option value="">-- Selecciona --</option>
-                <option value="indigena">Pueblo indígena</option>
-                <option value="negra-afro-raizal-palenquera">Comunidad negra, afrocolombiana, raizal, palenquera o afrodescendiente</option>
-                <option value="rom">Pueblo ROM</option>
-                <option value="mujer">Mujer</option>
-                <option value="lgtbi">Población LGTBI</option>
-                <option value="discapacidad">Persona en condición de discapacidad</option>
-                <option value="victima">Víctima del conflicto armado</option>
-                <option value="rural">Población rural</option>
-                <option value="otro">Otro</option>
+                <optgroup label="Grupos étnicos">
+                  <option value="indigena">Pueblo indígena</option>
+                  <option value="negra-afro-raizal-palenquera">Comunidad negra, afrocolombiana, raizal o palenquera</option>
+                  <option value="rrom">Pueblo Rrom o gitano</option>
+                </optgroup>
+                <optgroup label="Otros enfoques">
+                  <option value="victima">Víctima del conflicto armado</option>
+                  <option value="discapacidad">Persona con discapacidad</option>
+                  <option value="mujer">Mujer (enfoque de género)</option>
+                  <option value="lgbtiq">Persona con orientación sexual o identidad de género diversa (LGBTIQ+)</option>
+                  <option value="campesino">Campesinado / población rural</option>
+                  <option value="otro">Otro</option>
+                </optgroup>
               </select>
-              <label class="form-label" for="consent-enfoque-id" style="margin-top:10px">Código RUV o documento que lo identifique <span class="req">*</span></label>
-              <input type="text" id="consent-enfoque-id" class="form-input" maxlength="60" autocomplete="off"
-                placeholder="Ej.: código RUV, certificado o documento que acredite el grupo">
-              <div class="form-hint" id="consent-enfoque-err" style="display:none;color:#E53E3E;font-style:normal">
-                Selecciona el grupo y escribe el código RUV o el documento que lo identifica.
+              <div id="consent-enfoque-id-wrap" style="display:none">
+                <label class="form-label" for="consent-enfoque-id" id="consent-enfoque-id-label" style="margin-top:10px">Código RUV (opcional)</label>
+                <input type="text" id="consent-enfoque-id" class="form-input" maxlength="60" autocomplete="off" placeholder="Opcional">
               </div>
-              <div class="form-hint">Es un dato sensible y voluntario. Se usa solo para sustentar el enfoque diferencial del producto.</div>
+                            <div class="form-hint" id="consent-enfoque-err" style="display:none;color:#E53E3E;font-style:normal">
+                Selecciona el grupo al que perteneces.
+              </div>
+              <div class="form-hint">Es un dato sensible y voluntario. Solo se pide un código o documento (opcional) cuando aplica al grupo elegido: código RUV para víctimas o certificación de pertenencia para los grupos étnicos. Para los demás grupos no se solicita ningún documento.</div>
             </div>
           </div>
 
@@ -3779,7 +3782,7 @@
           style="margin-top:4px;font-size:16px;min-height:54px">
           Entrar a mi espacio →
         </button>
-        <p style="text-align:center;font-size:11px;color:var(--txt2);margin-top:10px;margin-bottom:20px">
+        <p id="lock-note2" style="text-align:center;font-size:11px;color:var(--txt2);margin-top:10px;margin-bottom:20px">
           🔒 Tus datos permanecen en este dispositivo
         </p>
       </div>
@@ -3976,36 +3979,31 @@
             <button class="btn btn-ghost btn-sm" style="width:auto" id="export-teacher-excel">📊 Excel</button>
           </div>
 
-          <details class="card" id="act-theory-panel" style="margin-bottom:18px">
-            <summary style="cursor:pointer;font-weight:800;color:var(--azul);font-size:15px">📖 Fundamentación teórica de ACTiva Arte</summary>
-            <div style="margin-top:14px;font-size:13px;line-height:1.65">
-              <p style="margin-bottom:10px">«El lenguaje, que como veremos proporciona la base para el sufrimiento, es también la herramienta que permite al cliente ajustar su comportamiento a las contingencias naturales que sean valiosas para su vida.» <strong>(Luciano y Wilson, 2002, p. 23)</strong></p>
-              <h3 style="font-size:1rem;color:var(--azul);margin:14px 0 6px">¿Qué es ACT?</h3>
-              <p style="margin-bottom:8px">ACT es una forma de psicoterapia experiencial, conductual y cognitiva basada en la teoría del marco relacional del lenguaje y la cognición humana. Su modelo presta atención a la evitación experiencial, la fusión cognitiva, la clarificación de valores y los patrones de conducta rígidos o ineficaces.</p>
-              <blockquote style="border-left:3px solid var(--salvia);padding-left:12px;margin:8px 0 14px">«ACT es una forma de psicoterapia experiencial conductual y cognitiva basada en la teoría del marco relacional del lenguaje y la cognición humana […] y representa una perspectiva sobre la psicopatología que enfatiza el papel de la evitación experiencial, la fusión cognitiva, la ausencia o debilitamiento de los valores y la rigidez e ineficacia conductual resultantes.» <strong>(Hayes, 2002, p. 15)</strong></blockquote>
-              <h3 style="font-size:1rem;color:var(--azul);margin:14px 0 6px">Síntesis de evidencia empírica</h3>
-              <p style="margin-bottom:8px">La revisión de González Romero et al. (2026) reúne 25 artículos publicados entre 2006 y 2025. La siguiente síntesis recoge ejemplos señalados en el mapeo; no constituye una comparación directa entre todas las intervenciones ni garantiza resultados para cada estudiante.</p>
-              <div class="table-wrap"><table class="data-table"><thead><tr><th>Estudio</th><th>Diseño / área</th><th>Resultado resumido</th></tr></thead><tbody>
-                <tr><td>Powers et al. (2009)</td><td>Metaanálisis</td><td>ACT fue superior a controles (efecto 0,42) y placebo (0,68), pero no superior a tratamientos establecidos (0,18).</td></tr>
-                <tr><td>Bai et al. (2020)</td><td>Revisión sistemática y metaanálisis</td><td>Reducción de síntomas depresivos; resultados comparables a tratamientos establecidos.</td></tr>
-                <tr><td>Kelson et al. (2019)</td><td>Revisión sistemática</td><td>ACT por internet reduce síntomas de ansiedad; la adherencia varía.</td></tr>
-                <tr><td>Vowles et al. (2020)</td><td>Metaanálisis sobre dolor crónico</td><td>Se describen mejores efectos en enfoques interdisciplinarios que unidisciplinarios.</td></tr>
-                <tr><td>López-Pinar et al. (2025)</td><td>Metaanálisis sobre adolescentes</td><td>Resultados sobre ansiedad y depresión mediados por procesos de cambio.</td></tr>
-              </tbody></table></div>
-              <h3 style="font-size:1rem;color:var(--azul);margin:14px 0 6px">Nota metodológica</h3>
-              <p style="margin-bottom:8px">La evidencia resumida debe interpretarse considerando posibles sesgos de publicación, diferencias en la medición de procesos y la necesidad de más estudios con diseños de control activo. Esta síntesis sirve como contexto académico y no como diagnóstico ni predicción individual.</p>
-              <blockquote style="border-left:3px solid var(--salvia);padding-left:12px;margin:8px 0 14px">«Este último punto es crucial para superar limitaciones como los posibles sesgos de publicación, la heterogeneidad en la medición de procesos y la necesidad de más estudios con diseños de control activo.» <strong>(González Romero et al., 2026, p. 12)</strong></blockquote>
-              <h3 style="font-size:1rem;color:var(--azul);margin:14px 0 6px">Referencias</h3>
-              <p style="font-size:12px;color:var(--txt2);margin-bottom:8px">Las referencias se normalizaron con los datos disponibles en el mapeo. Para el artículo de González Romero et al. (2026), el Excel no incluye DOI, número de fascículo ni paginación del artículo; por eso no se añadieron datos bibliográficos no proporcionados.</p>
-              <ul style="padding-left:20px">
-                <li>Wilson, K. G., &amp; Luciano, M. C. (2002). <em>Terapia de aceptación y compromiso (ACT): Un tratamiento conductual orientado a los valores.</em> Ediciones Pirámide.</li>
-                <li>González Romero, O. de L., Esquivel Hernández, M. del P., Romero González, A. T., &amp; Romero González, A. G. (2026). Evolución histórica de la terapia de aceptación y compromiso. <em>Revista del Hospital Psiquiátrico de La Habana, 23.</em> http://www.revhph.sld.cu/</li>
-                <li>Hayes, S. C. (2002). Prólogo. En K. G. Wilson &amp; M. C. Luciano, <em>Terapia de aceptación y compromiso (ACT): Un tratamiento conductual orientado a los valores.</em> Ediciones Pirámide.</li>
-                <li>Luciano, M. C., &amp; Wilson, K. G. (2002). Presentación. En K. G. Wilson &amp; M. C. Luciano, <em>Terapia de aceptación y compromiso (ACT): Un tratamiento conductual orientado a los valores.</em> Ediciones Pirámide.</li>
-              </ul>
+          <style>
+            .proc-block{border:2px solid var(--azul);border-radius:16px;padding:16px;margin-bottom:22px;background:rgba(0,59,113,.03)}
+            .proc-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+            .proc-num{width:38px;height:38px;border-radius:50%;background:var(--azul);color:#fff;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+            .proc-head h2{font-family:'Lora',serif;font-size:1.15rem;color:var(--azul);margin:0}
+            .proc-head p{font-size:12px;color:var(--txt2);margin:2px 0 0}
+            .proc-pdfbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:20px 18px;font-size:18px;font-weight:900;background:linear-gradient(135deg,#F2A900,#e09500);color:#003B71;border:0;border-radius:14px;cursor:pointer;box-shadow:0 6px 22px rgba(242,169,0,.55)}
+            .proc-pdfbtn:hover{transform:translateY(-1px)}
+            .as-admin #proc1,.as-admin .proc-head{display:none}
+          </style>
+          <section class="proc-block" id="proc1">
+            <div class="proc-head"><span class="proc-num">1</span><div><h2>Alistamiento</h2><p>Prepara la versión offline que recibirán tus estudiantes.</p></div></div>
+            <div class="card">
+              <h3 class="section-title">Paso 1 · Envía tus PDFs diseñados</h3>
+              <p style="font-size:13px;color:var(--txt2);margin-bottom:12px">Entrega por el formulario los PDFs de cada módulo para que el administrador los cargue en la biblioteca.</p>
+              <button type="button" class="proc-pdfbtn" id="send-pdfs-btn" onclick="abrirFormularioPdfs()"><span style="font-size:1.8rem">🎨</span> Enviar PDFs diseñados</button>
             </div>
-          </details>
-
+            <!-- PDFs por actividad (Docente): elige qué PDFs verá el estudiante y descarga el HTML para distribuir -->
+          <div class="card" id="vault-teacher-card" style="display:none">
+            <h3 class="section-title">Paso 2 · Elige los PDFs que verá el estudiante en cada actividad (y descarga la versión offline)</h3>
+            <div id="vault-teacher-body"></div>
+          </div>
+          </section>
+          <section class="proc-block" id="proc2">
+            <div class="proc-head"><span class="proc-num">2</span><div><h2>Gestión y entrega de los JSON</h2><p>Importa el avance de tus estudiantes, genera tus informes y entrega el JSON del grupo.</p></div></div>
           <!-- IMPORTAR JSON en panel local -->
           <div
             style="background:linear-gradient(135deg,#0d1f3c,#003B71 70%,#005DA4);border-radius:14px;padding:22px;margin-bottom:18px">
@@ -4050,8 +4048,6 @@
             <button type="button" class="btn btn-primary" id="group-export-btn" onclick="exportGroupJson()">📦 Exportar JSON del grupo</button>
             <button type="button" class="btn btn-primary" id="entrega-open-btn" style="margin-top:10px" onclick="abrirFormularioEntrega()" disabled>📤 Abrir formulario de entrega</button>
             <div style="font-size:11px;color:var(--txt2);margin-top:6px">Se habilita al generar el informe PDF y el JSON del grupo. Cada entrega queda como una versión con fecha y hora.</div>
-            <hr style="border:0;border-top:1px solid var(--borde);margin:14px 0">
-            <button type="button" class="btn btn-ghost btn-sm" style="width:auto" onclick="abrirFormularioPdfs()">🎨 Enviar PDFs diseñados (formulario por módulo)</button>
           </div>
 
           <!-- Las guías PDF ya no las sube el docente: el administrador las carga en la Bóveda (por solicitud del formulario) y el docente solo marca cuáles ve el estudiante en cada actividad. -->
@@ -4105,10 +4101,17 @@
             <div class="gal-grid" id="teacher-gallery"></div>
           </div>
 
-          <!-- PDFs por actividad (Docente): elige qué PDFs verá el estudiante y descarga el HTML para distribuir -->
-          <div class="card" id="vault-teacher-card" style="display:none">
-            <h3 class="section-title">📚 PDFs que verá el estudiante en cada actividad</h3>
-            <div id="vault-teacher-body"></div>
+          </section>
+
+          <!-- DASHBOARD (solo Administrador) -->
+          <div class="card" id="admin-dashboard" style="display:none">
+            <h3 class="section-title">📊 Dashboard del administrador</h3>
+            <p style="font-size:12px;color:var(--txt2);margin-bottom:12px">Usuarios, su actividad y estadísticas de lo entregado (carga) y de lo trabajado en línea o en la versión offline.</p>
+            <div id="admin-dash-body"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+              <button class="btn btn-ghost btn-sm" style="width:auto" onclick="renderAdminDashboard()">🔄 Actualizar</button>
+              <button class="btn btn-ghost btn-sm" style="width:auto" onclick="exportAdminDashboard()">📊 Exportar Excel</button>
+            </div>
           </div>
 
           <!-- TRAZABILIDAD (solo Administrador): quién cargó / quién descargó recursos -->
@@ -4150,7 +4153,6 @@
           <div style="display:flex;flex-direction:column;gap:10px">
             <button class="btn btn-success" id="export-html">📄 Exportar Reporte HTML completo</button>
             <button class="btn btn-ghost btn-sm" id="export-data">⬇️ Exportar JSON de datos</button>
-            <button class="btn btn-ghost btn-sm" id="change-pin">🔑 Cambiar PIN</button>
           </div>
         </div>
       </div>
@@ -5364,7 +5366,14 @@
       if (pinErr) pinErr.style.display = 'none';
       if (pinInput) pinInput.value = '';
 
-      if (rol === 'profesor' || rol === 'administrador') {
+      const emailBlock = document.getElementById('role-email-block');
+      if (emailBlock) {
+        emailBlock.style.display = rol === 'profesor' ? 'block' : 'none';
+        if (rol === 'profesor') { const ei = document.getElementById('role-email-input'); if (ei && !ei.value) ei.value = getConfig().emailDocente || ''; const ee = document.getElementById('role-email-err'); if (ee) ee.style.display = 'none'; }
+      }
+      if (rol === 'profesor') {
+        if (pinBlock) pinBlock.style.display = 'none';
+      } else if (rol === 'administrador') {
         const cfg = getConfig();
         const targetPin = rol === 'profesor' ? cfg.pinDocente : cfg.pinAdministrador;
         const yaExiste = !!targetPin;
@@ -5388,10 +5397,24 @@
     // Utilizada en btn-continue-role y btn-accept-consent
     /** Nombre con el que se registra en la trazabilidad a un docente o administrador. */
     function staffActorName(rol) {
-      return rol === 'administrador' ? 'Administrador' : (getConfig().nombreDocente || 'Docente');
+      return rol === 'administrador' ? 'Administrador' : (getConfig().emailDocente || getConfig().nombreDocente || 'Docente');
     }
     function handleRoleSelection() {
       if (!selectedRole) { alert('Selecciona un rol primero'); return; }
+      if (selectedRole === 'profesor') {
+        const ei = document.getElementById('role-email-input'), ee = document.getElementById('role-email-err');
+        const em = (ei?.value || '').trim().toLowerCase();
+        if (!/^[a-z0-9._%+-]+@([a-z0-9-]+\.)*unad\.edu\.co$/.test(em)) {
+          if (ee) { ee.textContent = 'Escribe tu correo institucional (termina en @unad.edu.co).'; ee.style.display = 'block'; }
+          ei?.focus(); return;
+        }
+        if (ee) ee.style.display = 'none';
+        const cfg = getConfig(); cfg.emailDocente = em; setConfig(cfg);
+        state.mode = 'profesor'; saveState();
+        logAuditEvent('ingreso', '', '', staffActorName('profesor'), 'profesor', 'Ingreso al panel con correo institucional');
+        buildTeacher(); showScreen('screen-teacher');
+        return;
+      }
       if (selectedRole === 'profesor' || selectedRole === 'administrador') {
         const cfg = getConfig();
         let targetPin = selectedRole === 'profesor' ? cfg.pinDocente : cfg.pinAdministrador;
@@ -5471,7 +5494,7 @@
         const enfTipo = (document.getElementById('consent-enfoque-tipo')?.value || '').trim();
         const enfId = (document.getElementById('consent-enfoque-id')?.value || '').trim();
         const enfErr = document.getElementById('consent-enfoque-err');
-        if (enfCheck?.checked && (!enfTipo || !enfId)) {
+        if (enfCheck?.checked && !enfTipo) {
           if (enfErr) enfErr.style.display = 'block';
           valid = false;
         } else if (enfErr) enfErr.style.display = 'none';
@@ -5488,7 +5511,7 @@
         user.cedula = cedula;
         user.consentDate = new Date().toISOString();
         if (enfCheck?.checked) {
-          user.enfoqueDiferencial = { aplica: true, tipo: enfTipo, identificacion: enfId, fechaReporte: new Date().toISOString() };
+          user.enfoqueDiferencial = { aplica: true, tipo: enfTipo, identificacion: (['victima', 'indigena', 'negra-afro-raizal-palenquera', 'rrom'].includes(enfTipo) ? enfId : ''), fechaReporte: new Date().toISOString() };
         } else if (!user.enfoqueDiferencial) {
           user.enfoqueDiferencial = { aplica: false, fechaReporte: new Date().toISOString() };
         }
@@ -5498,6 +5521,14 @@
         buildCheckin(); showScreen('screen-checkin');
       });
 
+      document.getElementById('consent-enfoque-tipo')?.addEventListener('change', (e) => {
+        const t = e.target.value, w = document.getElementById('consent-enfoque-id-wrap'), l = document.getElementById('consent-enfoque-id-label'), i = document.getElementById('consent-enfoque-id');
+        const aplica = t === 'victima' || t === 'indigena' || t === 'negra-afro-raizal-palenquera' || t === 'rrom';
+        if (w) w.style.display = aplica ? 'block' : 'none';
+        if (!aplica && i) i.value = '';
+        if (l) l.textContent = t === 'victima' ? 'Código RUV (opcional)' : 'Certificación de pertenencia étnica o documento (opcional)';
+        if (i) i.placeholder = t === 'victima' ? 'Código del Registro Único de Víctimas, si lo tienes' : 'Número o nombre del documento, si lo tienes';
+      });
       document.getElementById('consent-enfoque-check')?.addEventListener('change', (e) => {
         const f = document.getElementById('consent-enfoque-fields'); if (f) f.style.display = e.target.checked ? 'block' : 'none';
       });
@@ -7291,25 +7322,6 @@ EMOCIONES REGISTRADAS:
       if (state.mode === 'profesor') marcarEntrega('informeExcel');
     });
 
-    // Botón "Cambiar PIN" del panel docente: pide por prompt() el rol y el nuevo PIN
-    // (mín. 4 caracteres) y lo guarda en la configuración del docente.
-    document.getElementById('change-pin').addEventListener('click', () => {
-      const role = prompt('¿Qué PIN deseas actualizar? (docente / administrador):');
-      if (!role) return;
-      const normalized = role.trim().toLowerCase();
-      if (normalized !== 'docente' && normalized !== 'administrador') {
-        openModal('Rol inválido', 'Ingresa "docente" o "administrador".');
-        return;
-      }
-      const newPin = prompt('Ingresa el nuevo PIN para ' + normalized + ':');
-      if (!newPin || newPin.trim().length < 4) { openModal('PIN inválido', 'El PIN debe tener al menos 4 caracteres.'); return; }
-      const cfg = getConfig();
-      if (normalized === 'docente') cfg.pinDocente = newPin.trim();
-      else cfg.pinAdministrador = newPin.trim();
-      setConfig(cfg);
-      toast('🔑 PIN ' + (normalized === 'docente' ? 'docente' : 'administrador') + ' actualizado');
-    });
-
     /* ============================================================
        CERRAR SESIÓN
     ============================================================ */
@@ -7491,7 +7503,9 @@ EMOCIONES REGISTRADAS:
     /** Persiste la cola de pendientes de sincronización. @param {string[]} a */
     const sQ = a => localStorage.setItem(SYNC_KEY, JSON.stringify(a));
     /** Lee la URL configurada del servidor (Google Apps Script). @returns {string} */
-    const gURL = () => (localStorage.getItem(GAS_URL_KEY) || '').trim();
+    // URL del receptor en Google Apps Script (Drive institucional). Se usa solo en la versión web (http/https); la versión offline no envía nada salvo que se configure manualmente.
+    const DEFAULT_SYNC_URL = '';
+    const gURL = () => (localStorage.getItem(GAS_URL_KEY) || (location.protocol !== 'file:' ? DEFAULT_SYNC_URL : '')).trim();
     /** Encola un usuario como pendiente de sincronizar (si no estaba ya) y refresca la UI de estado. @param {string} uid */
     const addQ = uid => { const q = gQ(); if (!q.includes(uid)) q.push(uid); sQ(q); updSync() };
     /** Vacía la cola de sincronización (tras un sync exitoso) y refresca la UI de estado. */
@@ -7551,7 +7565,7 @@ EMOCIONES REGISTRADAS:
       _syncing = true; connBar('syncing', '🔄 Sincronizando…');
       try {
         const toSync = getUsers().usuarios.filter(u => pend.includes(u.id));
-        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'syncUsers', source: 'auto', version: APP_VER, timestamp: new Date().toISOString(), payload: { usuarios: toSync } }), mode: 'cors', signal: AbortSignal.timeout(15000) });
+        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'syncUsers', source: 'auto', version: APP_VER, timestamp: new Date().toISOString(), payload: { usuarios: toSync, trazabilidad: getAudit() } }), mode: 'cors', signal: AbortSignal.timeout(15000) });
         if (r.ok) { clrQ(); connBar('online', '✅ Datos sincronizados'); toast('☁️ Sincronizado'); setTimeout(hideBar, 3500) }
         else connBar('offline', '⚠️ Error ' + r.status);
       } catch (e) { if (e.name !== 'AbortError') connBar('offline', '📴 Sin conexión') }
@@ -7600,6 +7614,11 @@ EMOCIONES REGISTRADAS:
       return (getUsers().usuarios || []).filter(u => u.rol === 'estudiante');
     }
 
+    const COMP_KEY = 'activa_compromiso_v1';
+    /** Compromiso del docente: {descarga, aceptado, archivo}. Se reinicia con cada descarga de la versión offline. */
+    function getCompromiso() { try { return JSON.parse(localStorage.getItem(COMP_KEY) || '{}'); } catch { return {}; } }
+    function setCompromiso(o) { try { localStorage.setItem(COMP_KEY, JSON.stringify(o)); } catch { } }
+    function compromisoOk() { const c = getCompromiso(); return !!(c.aceptado && c.descarga && c.aceptado >= c.descarga); }
     const ENTREGA_KEY = 'activa_entrega_v1';
     /** Pasos de la entrega formal ya cumplidos en esta versión: {informePdf, informeExcel, jsonGrupo} (fecha ISO). */
     function getEntrega() { try { return JSON.parse(localStorage.getItem(ENTREGA_KEY) || '{}'); } catch { return {}; } }
@@ -7612,6 +7631,7 @@ EMOCIONES REGISTRADAS:
     function abrirFormularioEntrega() {
       const e = getEntrega();
       if (!e.informePdf || !e.jsonGrupo) { toast('⚠️ Genera primero el informe PDF y el JSON del grupo'); return; }
+      if (!compromisoOk()) { toast('⚠️ Acepta primero el compromiso del docente (Proceso 1 · Alistamiento, tras descargar la versión offline)'); return; }
       logAuditEvent('entrega_formulario', '', 'Formulario de entrega', staffActorName('profesor'), 'profesor',
         'Informe PDF: ' + e.informePdf + ' · Excel: ' + (e.informeExcel || 'no') + ' · JSON del grupo: ' + e.jsonGrupo);
       window.open(FORM_ENTREGA_URL, '_blank', 'noopener');
@@ -7633,8 +7653,8 @@ EMOCIONES REGISTRADAS:
       const btn = document.getElementById('group-export-btn'); if (btn) btn.disabled = !n;
       const e = getEntrega(), paso = (k, txt, opt) => '<div>' + (e[k] ? '✅' : '⬜') + ' ' + txt + (opt ? ' <span style="color:var(--txt2)">(opcional)</span>' : '') + (e[k] ? ' <span style="color:var(--txt2);font-size:11px">· ' + new Date(e[k]).toLocaleString('es-CO') + '</span>' : '') + '</div>';
       const st = document.getElementById('entrega-steps');
-      if (st) st.innerHTML = paso('informePdf', 'Informe PDF generado (botón Reporte PDF)') + paso('informeExcel', 'Informe Excel generado (botón Excel)', true) + paso('jsonGrupo', 'JSON del grupo exportado') + '<div>' + (e.informePdf && e.jsonGrupo ? '➡️ Listo para entregar en el formulario' : '⬜ Entrega en el formulario') + '</div>';
-      const ob = document.getElementById('entrega-open-btn'); if (ob) ob.disabled = !(e.informePdf && e.jsonGrupo);
+      if (st) st.innerHTML = '<div>' + (compromisoOk() ? '✅' : '⬜') + ' Compromiso del docente aceptado <span style="color:var(--txt2);font-size:11px">(Proceso 1, tras descargar la versión offline)</span></div>' + paso('informePdf', 'Informe PDF generado (botón Reporte PDF)') + paso('informeExcel', 'Informe Excel generado (botón Excel)', true) + paso('jsonGrupo', 'JSON del grupo exportado') + '<div>' + (e.informePdf && e.jsonGrupo ? '➡️ Listo para entregar en el formulario' : '⬜ Entrega en el formulario') + '</div>';
+      const ob = document.getElementById('entrega-open-btn'); if (ob) ob.disabled = !(e.informePdf && e.jsonGrupo && compromisoOk());
     }
 
     /**
@@ -8044,18 +8064,20 @@ async function buildSnapshot(){
 }
 function downloadSnapshot(html,fn){ const u=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})), a=document.createElement('a'); a.href=u; a.download=fn; a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); }
 /* exportación: mismo flujo de siempre, ahora con instantánea limpia */
-let _compromiso=false; // el docente debe aceptar el compromiso antes de CADA descarga
-window.vaultCommit=ck=>{ _compromiso=!!ck; const b=document.getElementById('vault-dl-btn'); if(b) b.disabled=!_compromiso; };
-const COMPROMISO_TXT='Me comprometo a hacer llegar la versión offline a los usuarios finales (los estudiantes), a regresar el archivo JSON consolidado y a registrarlo en el formulario para el administrador.';
+const COMPROMISO_TXT='Me comprometo a hacer llegar la versión offline a los usuarios finales (los estudiantes), a regresar el archivo JSON consolidado y a registrarlo en el formulario de entrega para el administrador.';
+window.vaultCommit=ck=>{ if(!ck) return; const c=getCompromiso(); setCompromiso({descarga:c.descarga||new Date().toISOString(),aceptado:new Date().toISOString(),archivo:c.archivo||''}); audit('compromiso_docente','',c.archivo||'index.html',COMPROMISO_TXT); renderTeacherVault(); try{ renderGroupExport(true); }catch(e){} };
+function compBox(){ if(rol()!=='profesor') return ''; const c=getCompromiso(), ok=compromisoOk();
+  if(!c.descarga) return '<div class="v-f" style="margin-top:14px;border:1px dashed var(--borde);border-radius:var(--rs);padding:12px;opacity:.7"><label style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;font-size:13px"><input type="checkbox" disabled style="width:18px;height:18px;flex-shrink:0;margin-top:2px"><span><b>Paso 4 · Compromiso del docente</b> <span style="color:#c0392b">(obligatorio)</span>. '+COMPROMISO_TXT+'<br><i>Se habilita después de descargar la versión offline.</i></span></label></div>';
+  if(ok) return '<div class="v-f" style="margin-top:14px;border:1px solid #2e7d32;border-radius:var(--rs);padding:12px;background:rgba(46,125,50,.08)"><label style="display:flex;align-items:flex-start;gap:10px;line-height:1.5;font-size:13px"><input type="checkbox" checked disabled style="width:18px;height:18px;flex-shrink:0;margin-top:2px"><span><b>✅ Compromiso del docente aceptado</b> el '+new Date(c.aceptado).toLocaleString('es-CO')+'. '+COMPROMISO_TXT+'</span></label></div>';
+  return '<div class="v-f" style="margin-top:14px;border:2px solid var(--amarillo);border-radius:var(--rs);padding:12px;background:rgba(242,169,0,.12)"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;line-height:1.5;font-size:13px"><input type="checkbox" id="vault-commit-ck" required style="width:18px;height:18px;flex-shrink:0;margin-top:2px" onchange="vaultCommit(this.checked)"><span><b>Paso 4 · Compromiso del docente</b> <span style="color:#c0392b">* obligatorio</span>. '+COMPROMISO_TXT+'<br><span style="color:#c0392b;font-size:12px">Ya descargaste la versión offline: márcalo para poder abrir el formulario de entrega de los JSON.</span></span></label></div>'; }
 window.exportIndexHtmlFile=async function(fn,msg){
-  if(rol()==='profesor'&&!_compromiso){ toast('⚠️ Marca el compromiso de distribución para habilitar la descarga'); return; }
   try{ syncEmbeddedDocs(getDocs()); }catch(e){}
   const st=await getVaultStats().catch(()=>({count:0,used:0}));
   if(st.used>12*1048576&&!confirm('La aplicación contiene varios archivos PDF. La copia HTML puede ser considerablemente más pesada que los originales y la exportación puede tardar unos segundos. ¿Continuar?')) return;
-  try{ if(rol()==='profesor') audit('compromiso_docente','',fn,COMPROMISO_TXT);
-    audit('pdf_vault_exported','',fn,'Botón "Descargar HTML para distribuir" ('+st.count+' PDFs en la biblioteca)'); // se registra antes para que viaje dentro del archivo
+  try{ audit('pdf_vault_exported','',fn,'Botón "Descargar HTML para distribuir" ('+st.count+' PDFs en la biblioteca)'); // se registra antes para que viaje dentro del archivo
     downloadSnapshot(await buildSnapshot(),fn); toast(msg);
-    if(rol()==='profesor'){ _compromiso=false; renderTeacherVault(); } }catch(e){ toast('⚠️ '+friendly(e)); } };
+    if(rol()==='profesor'){ setCompromiso({descarga:new Date().toISOString(),aceptado:null,archivo:fn}); }
+    renderTeacherVault(); try{ renderGroupExport(rol()==='profesor'); }catch(e){} }catch(e){ toast('⚠️ '+friendly(e)); } };
 /* ---- Guardado automático sobre el mismo archivo HTML (Chrome/Edge, File System Access API) ---- */
 const FS_OK=typeof window.showOpenFilePicker==='function';
 let _saveT, _saving=false, _pending=false;
@@ -8150,15 +8172,111 @@ async function renderTeacherVault(){ const card=document.getElementById('vault-t
    `<div class="v-grid">`+EXERCISES.map(ex=>{const ids=assign[ex.id]||[];
      return `<div class="v-card"><b>${ex.icon} ${escHtml(ex.title)}</b><div style="font-size:12px;color:var(--txt2)">${ids.length} / 2 PDFs asignados</div>`+
       st.files.map(f=>`<div class="v-f"><label style="display:block;cursor:pointer"><input type="checkbox" ${ids.includes(f.id)?'checked':''} onchange="vaultUI('assign','${ex.id}','${f.id}')"> ${escHtml(f.name)} <span style="color:var(--txt2)">(${mb(f.size)})</span></label><button type="button" onclick="vaultUI('open','${f.id}')" aria-label="Ver ${escHtml(f.name)}">👁 Ver</button></div>`).join('')+`</div>`;}).join('')+`</div>
-   <div class="v-f" style="margin-top:14px;border:1px solid var(--amarillo);border-radius:var(--rs);padding:12px;background:rgba(242,169,0,.08)"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;line-height:1.5;font-size:13px"><input type="checkbox" id="vault-commit-ck" style="width:18px;height:18px;flex-shrink:0;margin-top:2px" ${_compromiso?'checked':''} onchange="vaultCommit(this.checked)"><span><b>Compromiso del docente.</b> ${COMPROMISO_TXT}</span></label></div>
-   <button class="v-add" id="vault-dl-btn" style="width:auto;margin-top:12px" ${_compromiso?'':'disabled'} onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>
-   <div style="font-size:11px;color:var(--txt2);margin-top:6px">La descarga se habilita al aceptar el compromiso. Debes aceptarlo cada vez que descargues.</div>`; }
+   <div class="v-f" style="margin-top:14px"><b>Paso 3 · Descarga la versión offline</b></div>
+   <button class="v-add" id="vault-dl-btn" style="width:auto;margin-top:8px" onclick="exportIndexHtmlFile('index.html','💾 HTML descargado con PDFs incrustados')">⬇ Descargar HTML para distribuir</button>
+   ${compBox()}
+   <div style="font-size:11px;color:var(--txt2);margin-top:6px">Tras cada descarga debes marcar de nuevo el compromiso.</div>`; }
 const _bt=window.buildTeacher; if(typeof _bt==='function') window.buildTeacher=function(){ const r=_bt.apply(this,arguments); renderTeacherVault(); return r; };
 const _se=window.startExercise;
 window.startExercise=function(exId){ const r=_se.apply(this,arguments); audit('ejercicio_iniciado',exId,'','Abrió la actividad desde el tablero'); const det=document.getElementById('exercise-detail');
   if(det&&det.children.length){ const box=document.createElement('div'); box.id='vault-ex-panel'; const cl=det.querySelector('.ex-close-card'); (cl&&cl.parentNode===det)?cl.before(box):det.append(box); refreshExPanel(); } return r; };
 const _vu=window.vaultUI; window.vaultUI=async function(){ await _vu.apply(this,arguments); setTimeout(()=>{ refreshExPanel(); renderTeacherVault(); },300); };
 restoreEmbeddedPdfVault().then(migrateAssign).then(()=>{ renderTeacherVault(); refreshExPanel(); }).catch(e=>{console.error(e);audit('pdf_sync_failed','','restauración');});
+})();
+</script>
+<script id="dash-module">
+(function(){
+const $=id=>document.getElementById(id);
+const E=s=>escHtml(String(s==null?'':s));
+const exId=x=>typeof x==='string'?x:((x&&(x.id||x.ejercicio||x.exId||x.ex))||'');
+const fmt=iso=>{ try{ return new Date(iso).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'}); }catch(e){ return ''; } };
+const kpi=(n,l)=>'<div style="background:var(--bg2,#f4f6fa);border:1px solid var(--borde);border-radius:10px;padding:12px;text-align:center"><div style="font-size:1.5rem;font-weight:900;color:var(--azul)">'+n+'</div><div style="font-size:11px;color:var(--txt2);line-height:1.3">'+l+'</div></div>';
+const bar=(label,val,max,extra)=>'<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0"><span style="width:170px;flex-shrink:0">'+label+'</span><div style="flex:1;background:var(--borde);border-radius:6px;height:12px;overflow:hidden"><div style="height:100%;width:'+(max?Math.round(val*100/max):0)+'%;background:var(--azul)"></div></div><b style="width:34px;text-align:right">'+val+'</b>'+(extra||'')+'</div>';
+
+function compute(){
+  const ev=getAudit(), users=(getUsers().usuarios||[]).filter(u=>u.rol==='estudiante');
+  const via=e=>String(e.via||'');
+  const isWeb=e=>/· web ·/.test(via(e)), isLocal=e=>/archivo local/.test(via(e));
+  const n=a=>ev.filter(e=>e.action===a).length;
+  const acts=EXERCISES.map(ex=>{
+    const ses=users.reduce((t,u)=>t+(u.sesiones||[]).reduce((s,x)=>s+(x.ejerciciosCompletados||[]).filter(i=>exId(i)===ex.id).length,0),0);
+    const done=ev.filter(e=>e.action==='ejercicio_completado'&&e.exId===ex.id);
+    return {ex,total:Math.max(ses,done.length),web:done.filter(isWeb).length,local:done.filter(isLocal).length};
+  });
+  const days=[]; for(let i=13;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().slice(0,10); days.push({k,n:ev.filter(e=>(e.ts||'').slice(0,10)===k).length}); }
+  const stu=users.map(u=>{
+    const mine=ev.filter(e=>(u.id&&e.actorId===u.id)||e.actor===u.nombre);
+    const ses=(u.sesiones||[]);
+    const comp=ses.reduce((t,s)=>t+(s.ejerciciosCompletados||[]).length,0);
+    const lastS=ses.map(s=>s.fecha).sort().pop()||''; const lastE=mine.map(e=>e.ts).sort().pop()||'';
+    const last=[lastS,lastE].sort().pop();
+    const lastEv=mine.slice().sort((a,b)=>a.ts<b.ts?-1:1).pop();
+    return {nombre:u.nombre,cedula:u.cedula||'',ses:ses.length,comp,ev:mine.length,last,via:lastEv?via(lastEv):'—',enf:!!(u.enfoqueDiferencial&&u.enfoqueDiferencial.aplica)};
+  });
+  const staffMap={};
+  ev.filter(e=>e.role&&e.role!=='estudiante').forEach(e=>{ const k=e.role+'|'+e.actor; const o=staffMap[k]||(staffMap[k]={actor:e.actor,role:e.role,ev:0,ing:0,pdf:0,dl:0,json:0,ent:0,last:''}); o.ev++; if(e.action==='ingreso')o.ing++; if(e.action==='pdf_uploaded'||e.action==='carga')o.pdf++; if(e.action==='pdf_vault_exported')o.dl++; if(e.action==='json_grupo_exportado'||e.action==='json_importado')o.json++; if(e.action==='entrega_formulario'||e.action==='pdfs_formulario')o.ent++; if(e.ts>o.last)o.last=e.ts; });
+  const staff=Object.values(staffMap).sort((a,b)=>a.last<b.last?1:-1);
+  return {ev,users,acts,days,stu,staff,
+    k:{usuarios:users.length,staff:staff.length,eventos:ev.length,web:ev.filter(isWeb).length,local:ev.filter(isLocal).length,
+      completadas:acts.reduce((t,a)=>t+a.total,0),pdfCarga:n('pdf_uploaded')+n('carga'),pdfDesc:n('pdf_vault_exported'),
+      jsonRec:n('json_importado'),jsonGrp:n('json_grupo_exportado'),entregas:n('entrega_formulario'),pdfsForm:n('pdfs_formulario'),compromisos:n('compromiso_docente'),
+      enfoque:stu.filter(s=>s.enf).length}};
+}
+
+window.renderAdminDashboard=function(){
+  const card=$('admin-dashboard'); if(!card) return;
+  const adm=state.mode==='administrador'; card.style.display=adm?'':'none'; if(!adm) return;
+  const d=compute(), k=d.k, maxD=Math.max(1,...d.days.map(x=>x.n)), maxA=Math.max(1,...d.acts.map(a=>a.total));
+  const th=h=>'<th>'+h+'</th>';
+  $('admin-dash-body').innerHTML=
+   '<div class="grid-3" style="gap:10px;margin-bottom:14px">'+
+    kpi(k.usuarios,'Estudiantes registrados')+kpi(k.staff,'Docentes / admin con actividad')+kpi(k.eventos,'Eventos registrados')+
+    kpi(k.web,'Acciones en línea (web)')+kpi(k.local,'Acciones en versión offline')+kpi(k.completadas,'Actividades completadas')+
+    kpi(k.pdfCarga,'PDFs cargados a la biblioteca')+kpi(k.pdfDesc,'Descargas de HTML para distribuir')+kpi(k.pdfsForm,'Formularios de PDFs diseñados abiertos')+
+    kpi(k.jsonRec,'Cargas de JSON de estudiantes')+kpi(k.jsonGrp,'JSON de grupo generados')+kpi(k.entregas,'Entregas formales (formulario)')+
+    kpi(k.compromisos,'Compromisos de docentes aceptados')+kpi(k.enfoque,'Estudiantes con enfoque diferencial reportado')+
+   '</div>'+
+   '<h4 style="margin:12px 0 6px;font-size:14px">En línea vs. versión offline</h4>'+
+   bar('🌐 En línea (web)',k.web,Math.max(1,k.web+k.local))+bar('💾 Offline (archivo local)',k.local,Math.max(1,k.web+k.local))+
+   '<h4 style="margin:14px 0 6px;font-size:14px">Actividades completadas por proceso ACT</h4>'+
+   d.acts.map(a=>bar(a.ex.icon+' '+E(a.ex.title),a.total,maxA,'<span style="font-size:10px;color:var(--txt2);width:90px">web '+a.web+' · offline '+a.local+'</span>')).join('')+
+   '<h4 style="margin:14px 0 6px;font-size:14px">Eventos por día (últimos 14 días)</h4>'+
+   d.days.map(x=>bar(x.k.slice(5),x.n,maxD)).join('')+
+   '<h4 style="margin:14px 0 6px;font-size:14px">👥 Estudiantes y su actividad</h4>'+
+   '<div class="table-wrap"><table class="data-table"><thead><tr>'+['Nombre','Cédula','Sesiones','Actividades','Eventos','Última actividad','Cómo (último acceso)'].map(th).join('')+'</tr></thead><tbody>'+
+   (d.stu.length?d.stu.map(s=>'<tr><td>'+E(s.nombre)+'</td><td>'+E(s.cedula)+'</td><td>'+s.ses+'</td><td>'+s.comp+'</td><td>'+s.ev+'</td><td>'+E(fmt(s.last))+'</td><td>'+E(s.via)+'</td></tr>').join(''):'<tr><td colspan="7">Aún no hay estudiantes importados. Importa los JSON para verlos aquí.</td></tr>')+'</tbody></table></div>'+
+   '<h4 style="margin:14px 0 6px;font-size:14px">🧑‍🏫 Docentes y administrador</h4>'+
+   '<div class="table-wrap"><table class="data-table"><thead><tr>'+['Usuario','Rol','Ingresos','PDFs cargados','HTML descargado','JSON','Formularios','Última actividad'].map(th).join('')+'</tr></thead><tbody>'+
+   (d.staff.length?d.staff.map(s=>'<tr><td>'+E(s.actor)+'</td><td>'+E(s.role)+'</td><td>'+s.ing+'</td><td>'+s.pdf+'</td><td>'+s.dl+'</td><td>'+s.json+'</td><td>'+s.ent+'</td><td>'+E(fmt(s.last))+'</td></tr>').join(''):'<tr><td colspan="8">Sin actividad registrada.</td></tr>')+'</tbody></table></div>'+
+   '<p style="font-size:11px;color:var(--txt2);margin-top:10px">Refleja los datos presentes en este dispositivo: la trazabilidad propia, la que viaja en los HTML y JSON recibidos y los JSON importados. «En línea» = acciones hechas desde la versión web; «offline» = desde el archivo descargado.</p>';
+};
+window.exportAdminDashboard=function(){
+  const d=compute(), k=d.k, rows=[['Indicador','Valor'],
+   ['Estudiantes registrados',k.usuarios],['Docentes/admin con actividad',k.staff],['Eventos',k.eventos],['Acciones en línea (web)',k.web],['Acciones offline',k.local],
+   ['Actividades completadas',k.completadas],['PDFs cargados',k.pdfCarga],['Descargas HTML para distribuir',k.pdfDesc],['Formularios de PDFs',k.pdfsForm],
+   ['Cargas de JSON de estudiantes',k.jsonRec],['JSON de grupo',k.jsonGrp],['Entregas formales',k.entregas],['Compromisos aceptados',k.compromisos],[],
+   ['Actividad','Completadas','Web','Offline']].concat(d.acts.map(a=>[a.ex.title,a.total,a.web,a.local])).concat([[],['Estudiante','Cédula','Sesiones','Actividades','Eventos','Última actividad','Cómo']]).concat(d.stu.map(s=>[s.nombre,s.cedula,s.ses,s.comp,s.ev,fmt(s.last),s.via])).concat([[],['Usuario','Rol','Ingresos','PDFs cargados','HTML descargado','JSON','Formularios','Última actividad']]).concat(d.staff.map(s=>[s.actor,s.role,s.ing,s.pdf,s.dl,s.json,s.ent,fmt(s.last)]));
+  downloadXlsx(rows,'ACTiva_Dashboard_'+new Date().toISOString().slice(0,10)+'.xlsx','Dashboard');
+  toast('📊 Dashboard exportado');
+};
+
+const _b=window.buildTeacher;
+window.buildTeacher=function(){ const r=_b.apply(this,arguments);
+  try{ const sc=$('screen-teacher'); if(sc) sc.classList.toggle('as-admin',state.mode==='administrador'); renderAdminDashboard(); }catch(e){ console.error(e); }
+  return r; };
+
+/* Avisos de almacenamiento: "solo en este dispositivo" únicamente en la versión offline */
+function lockNotes(){
+  const off=location.protocol==='file:'; let u=''; try{ u=gURL(); }catch(e){}
+  [['lock-note','🔒 Tus datos se guardan solo en este dispositivo'],['lock-note2','🔒 Tus datos permanecen en este dispositivo']].forEach(([id,t])=>{
+    const el=$(id); if(!el) return;
+    if(off){ el.textContent=t; el.style.display=''; }
+    else if(u){ el.textContent='☁️ Tus avances se respaldan en la nube institucional (Drive) cuando hay conexión'; el.style.display=''; }
+    else el.style.display='none';
+  });
+}
+lockNotes();
+$('role-email-input')?.addEventListener('keydown',e=>{ if(e.key==='Enter') $('btn-continue-role')?.click(); });
 })();
 </script>
 </body>
