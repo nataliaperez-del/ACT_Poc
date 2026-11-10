@@ -8280,6 +8280,97 @@ lockNotes();
 $('role-email-input')?.addEventListener('keydown',e=>{ if(e.key==='Enter') $('btn-continue-role')?.click(); });
 })();
 </script>
+<style>
+#help-fab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:9000;width:44px;height:52px;border:0;border-radius:14px 0 0 14px;background:var(--azul,#003B71);color:#fff;font-size:24px;font-weight:900;cursor:pointer;box-shadow:-3px 3px 14px rgba(0,0,0,.25)}
+#help-fab:hover{width:50px}
+#help-panel{position:fixed;top:0;right:0;height:100%;width:min(440px,100vw);z-index:9100;background:var(--card,#fff);color:var(--txt,#1a1a1a);box-shadow:-6px 0 28px rgba(0,0,0,.3);transform:translateX(105%);transition:transform .25s;display:flex;flex-direction:column}
+#help-panel.open{transform:none}
+#help-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--azul,#003B71);color:#fff}
+#help-head b{font-family:'Lora',serif;font-size:1.05rem}
+#help-close{background:none;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+#help-tabs{display:flex;border-bottom:1px solid var(--borde,#ddd)}
+#help-tabs button{flex:1;padding:12px 8px;border:0;background:none;font-weight:800;font-size:13px;cursor:pointer;color:var(--txt2,#555);border-bottom:3px solid transparent}
+#help-tabs button.on{color:var(--azul,#003B71);border-bottom-color:var(--amarillo,#F2A900)}
+#help-body{overflow:auto;padding:16px;font-size:13px;line-height:1.6;flex:1}
+#help-body h4{margin:16px 0 6px;font-size:14px;color:var(--azul,#003B71)}
+#help-body ol,#help-body ul{padding-left:20px;margin:6px 0}
+#help-body li{margin-bottom:5px}
+#help-body details{border:1px solid var(--borde,#ddd);border-radius:10px;padding:8px 12px;margin:6px 0}
+#help-body summary{cursor:pointer;font-weight:700}
+.help-video{border:1px dashed var(--borde,#bbb);border-radius:12px;padding:10px;text-align:center;background:rgba(0,59,113,.04)}
+.help-video iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px}
+.help-video a{display:inline-block;margin-top:6px;font-weight:800;color:var(--azul,#003B71)}
+@media print{#help-fab,#help-panel{display:none}}
+</style>
+<button id="help-fab" type="button" aria-label="Ayuda: manuales de uso" title="Ayuda y manuales">?</button>
+<aside id="help-panel" role="dialog" aria-label="Manuales de uso" aria-hidden="true">
+  <div id="help-head"><b>Ayuda · Manuales de uso</b><button id="help-close" type="button" aria-label="Cerrar ayuda">×</button></div>
+  <div id="help-tabs"><button type="button" data-tab="est" class="on">👤 Manual del usuario</button><button type="button" data-tab="doc">📋 Manual del docente</button></div>
+  <div id="help-body"></div>
+</aside>
+<script id="help-module">
+(function(){
+/* Enlaces de los videos (YouTube o Drive). Déjalos vacíos hasta tener la grabación. */
+const VIDEO_ESTUDIANTE_URL='';
+const VIDEO_DOCENTE_URL='';
+const $=id=>document.getElementById(id);
+function embed(u){ const m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/); if(m) return 'https://www.youtube.com/embed/'+m[1];
+  const d=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/); return d?'https://drive.google.com/file/d/'+d[1]+'/preview':''; }
+function video(url,titulo){
+  if(!url) return '<div class="help-video">🎬 <b>'+titulo+'</b><br><span style="color:var(--txt2)">El video estará disponible próximamente.</span></div>';
+  const e=embed(url), web=location.protocol!=='file:'&&navigator.onLine;
+  return '<div class="help-video">'+(e&&web?'<iframe src="'+e+'" title="'+titulo+'" allowfullscreen loading="lazy"></iframe>':'🎬 <b>'+titulo+'</b><br>')+'<a href="'+url+'" target="_blank" rel="noopener">▶ Ver el video</a><div style="font-size:11px;color:var(--txt2)">Requiere conexión a internet.</div></div>'; }
+const EST=()=>video(VIDEO_ESTUDIANTE_URL,'Video: lo que puedes hacer como estudiante')+`
+<h4>1 · Entrar</h4>
+<ol><li>Abre la aplicación (archivo <b>.html</b> en Chrome o Edge, o el enlace web que te dio tu docente).</li>
+<li>Elige <b>Estudiante</b> y pulsa <b>Continuar</b>.</li>
+<li>Lee el consentimiento, escribe tu <b>nombre completo y cédula reales</b> y marca la casilla de aceptación.</li>
+<li>Opcional: si quieres, reporta un enfoque diferencial. No es obligatorio y solo se pide un código o documento (también opcional) cuando aplica.</li></ol>
+<h4>2 · Tu check-in de cada día</h4>
+<p>Toca <b>una o más emociones</b> con las que te identificas hoy. No hay respuestas incorrectas.</p>
+<h4>3 · Actividades</h4>
+<ul><li>En tu panel verás <b>Hoy te recomendamos</b> y las <b>seis actividades</b> guiadas, una por cada proceso de ACT.</li>
+<li>Cada actividad tiene su guía en PDF (si tu docente la dejó disponible) y un espacio para expresarte con arte.</li>
+<li>El <b>Módulo de Reflexión</b> es un único espacio para escribir lo que quieras.</li>
+<li>Con tus avances ganas <b>puntos, racha y logros</b>; los ves en <b>Mi Progreso</b> y <b>Logros</b>.</li></ul>
+<h4>4 · Entregar tu avance</h4>
+<ol><li>En el panel, sección <b>Mis datos</b>, pulsa <b>Exportar mis datos (.json) para el docente</b>.</li>
+<li>El archivo se descarga con tu nombre y cédula, por ejemplo <i>ACTivaArte_Maria_Perez_1032162406_2026-10-01.json</i>.</li>
+<li>Entrégalo a tu docente por el medio que él indique. No lo modifiques.</li></ol>
+<h4>Preguntas frecuentes</h4>
+<details><summary>¿Se guardan mis datos?</summary><p>En la versión offline se guardan solo en tu dispositivo (si borras los datos del navegador, se pierden: exporta tu JSON con frecuencia). En la versión web, cuando hay conexión, pueden respaldarse en la nube institucional.</p></details>
+<details><summary>¿Reemplaza la terapia?</summary><p>No. Es una herramienta que busca tu bienestar emocional y no sustituye la atención profesional. Si lo necesitas, habla con tu docente o busca apoyo especializado.</p></details>
+<details><summary>¿Puedo usarla sin internet?</summary><p>Sí. La versión offline funciona sin conexión; solo necesitas internet para ver los videos.</p></details>
+<details><summary>Cambié de computador, ¿qué hago?</summary><p>Tu progreso vive en el dispositivo. Exporta tu JSON antes de cambiar y entrégalo al docente.</p></details>`;
+const DOC=()=>video(VIDEO_DOCENTE_URL,'Video: lo que puedes hacer como docente')+`
+<h4>Ingreso</h4>
+<p>Elige <b>Docente</b>, escribe tu <b>correo institucional (@unad.edu.co)</b> y continúa. Tus acciones quedan registradas con ese correo.</p>
+<h4>Proceso 1 · Alistamiento</h4>
+<ol><li><b>Enviar PDFs diseñados:</b> pulsa el botón amarillo grande y entrega en el formulario los PDFs de cada módulo (máximo 2 por módulo, 2 MB cada uno). El administrador los carga en la biblioteca.</li>
+<li><b>Elegir PDFs por actividad:</b> con <b>👁 Ver</b> revisa cada PDF y deja marcados hasta 2 por actividad. Si no ves PDFs, pulsa <b>🔄 Actualizar lista</b> o pide al administrador el HTML actualizado. Tú no cargas archivos.</li>
+<li><b>Compromiso del docente (obligatorio):</b> marca la casilla. Sin marcarla, la descarga está bloqueada. Debes marcarla en <b>cada</b> descarga.</li>
+<li><b>Descargar la versión offline:</b> pulsa <b>⬇ Descargar HTML para distribuir</b> y haz llegar ese archivo a tus estudiantes.</li></ol>
+<h4>Proceso 2 · Gestión y entrega de los JSON</h4>
+<ol><li><b>Importar JSON de estudiantes:</b> carga (o arrastra) los .json que te entregaron. Puedes cargar varios a la vez.</li>
+<li><b>Revisar el grupo:</b> resumen, emociones, tabla de estudiantes, patrones y banco de respuestas e imágenes, con filtros.</li>
+<li><b>Informes:</b> genera el <b>Reporte PDF</b> (obligatorio para la entrega) y, si quieres, el <b>Excel</b>.</li>
+<li><b>Exportar JSON del grupo:</b> reúne a todos tus estudiantes y la trazabilidad en un solo archivo. Entregarlo al administrador es tu responsabilidad.</li>
+<li><b>Abrir formulario de entrega:</b> se habilita cuando tienes el compromiso, el informe PDF y el JSON del grupo. Adjunta allí los archivos.</li></ol>
+<h4>Preguntas frecuentes</h4>
+<details><summary>El botón de descarga está bloqueado</summary><p>Marca el compromiso del docente (Paso 3). Se bloquea de nuevo después de cada descarga.</p></details>
+<details><summary>El formulario de entrega no se abre</summary><p>Revisa la lista de pasos de “Entrega formal”: faltan el compromiso, el informe PDF o el JSON del grupo.</p></details>
+<details><summary>¿Quién ve lo que hago?</summary><p>Tus acciones (ingresos, descargas, entregas) se registran en la trazabilidad y viajan con los archivos que distribuyes; el administrador las consolida.</p></details>
+<details><summary>Soy estudiante o administrador, ¿qué manual me sirve?</summary><p>Los estudiantes usan la pestaña “Manual del usuario”. El administrador tiene su propio panel con la Bóveda de PDFs, el dashboard y la trazabilidad.</p></details>`;
+let tab='est';
+function render(){ $('help-body').innerHTML=tab==='doc'?DOC():EST(); document.querySelectorAll('#help-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab)); }
+function open_(){ try{ const m=window.state&&state.mode; if(m==='profesor'||m==='administrador') tab='doc'; }catch(e){} render(); $('help-panel').classList.add('open'); $('help-panel').setAttribute('aria-hidden','false'); $('help-close').focus(); }
+function close_(){ $('help-panel').classList.remove('open'); $('help-panel').setAttribute('aria-hidden','true'); $('help-fab').focus(); }
+$('help-fab').addEventListener('click',()=>$('help-panel').classList.contains('open')?close_():open_());
+$('help-close').addEventListener('click',close_);
+document.querySelectorAll('#help-tabs button').forEach(b=>b.addEventListener('click',()=>{ tab=b.dataset.tab; render(); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('help-panel').classList.contains('open')) close_(); });
+})();
+</script>
 </body>
 
 </html>
