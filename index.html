@@ -8311,14 +8311,15 @@ $('role-email-input')?.addEventListener('keydown',e=>{ if(e.key==='Enter') $('bt
 <script id="help-module">
 (function(){
 /* Enlaces de los videos (YouTube o Drive). Déjalos vacíos hasta tener la grabación. */
-const VIDEO_ESTUDIANTE_URL='';
-const VIDEO_DOCENTE_URL='';
+const VIDEO_ESTUDIANTE_URL='https://actpoc.vercel.app/manuales/video-estudiante.mp4';
+const VIDEO_DOCENTE_URL='https://actpoc.vercel.app/manuales/video-docente.mp4';
 const $=id=>document.getElementById(id);
 function embed(u){ const m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{11})/); if(m) return 'https://www.youtube.com/embed/'+m[1];
   const d=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/); return d?'https://drive.google.com/file/d/'+d[1]+'/preview':''; }
 function video(url,titulo){
   if(!url) return '<div class="help-video">🎬 <b>'+titulo+'</b><br><span style="color:var(--txt2)">El video estará disponible próximamente.</span></div>';
   const e=embed(url), web=location.protocol!=='file:'&&navigator.onLine;
+  if(/\.mp4(\?.*)?$/i.test(url)) return '<div class="help-video">'+(web?'<video controls preload="none" style="width:100%;border-radius:8px" src="'+url+'"></video>':'🎬 <b>'+titulo+'</b><br>')+'<a href="'+url+'" target="_blank" rel="noopener">▶ Ver el video en pantalla completa</a><div style="font-size:11px;color:var(--txt2)">Requiere conexión a internet.</div></div>';
   return '<div class="help-video">'+(e&&web?'<iframe src="'+e+'" title="'+titulo+'" allowfullscreen loading="lazy"></iframe>':'🎬 <b>'+titulo+'</b><br>')+'<a href="'+url+'" target="_blank" rel="noopener">▶ Ver el video</a><div style="font-size:11px;color:var(--txt2)">Requiere conexión a internet.</div></div>'; }
 const EST=()=>video(VIDEO_ESTUDIANTE_URL,'Video: lo que puedes hacer como estudiante')+`
 <h4>1 · Entrar</h4>
@@ -8363,7 +8364,7 @@ const DOC=()=>video(VIDEO_DOCENTE_URL,'Video: lo que puedes hacer como docente')
 <details><summary>Soy estudiante o administrador, ¿qué manual me sirve?</summary><p>Los estudiantes usan la pestaña “Manual del usuario”. El administrador tiene su propio panel con la Bóveda de PDFs, el dashboard y la trazabilidad.</p></details>`;
 let tab='est';
 function render(){ $('help-body').innerHTML=tab==='doc'?DOC():EST(); document.querySelectorAll('#help-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab)); }
-function open_(){ try{ const m=window.state&&state.mode; if(m==='profesor'||m==='administrador') tab='doc'; }catch(e){} render(); $('help-panel').classList.add('open'); $('help-panel').setAttribute('aria-hidden','false'); $('help-close').focus(); }
+function open_(){ try{ const m=(typeof state!=='undefined')&&state.mode; if(m==='profesor'||m==='administrador') tab='doc'; }catch(e){} render(); $('help-panel').classList.add('open'); $('help-panel').setAttribute('aria-hidden','false'); $('help-close').focus(); }
 function close_(){ $('help-panel').classList.remove('open'); $('help-panel').setAttribute('aria-hidden','true'); $('help-fab').focus(); }
 $('help-fab').addEventListener('click',()=>$('help-panel').classList.contains('open')?close_():open_());
 $('help-close').addEventListener('click',close_);
